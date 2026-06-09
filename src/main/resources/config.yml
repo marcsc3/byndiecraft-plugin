@@ -27,10 +27,9 @@ board:
     z: 200
 
   # Status columns configuration
-  # Each column represents a Jira status and contains item frame locations
-  # Column names are display names; jira_status_name must match the API status exactly
+  # "name" is displayed on the Minecraft sign; "jira_status_name" must match the API status
   columns:
-    - name: "Backlog"
+    - name: "Ready to be Picked Up"
       jira_status_name: "Backlog"
       frames: []
 
@@ -38,16 +37,16 @@ board:
       jira_status_name: "In Progress"
       frames: []
 
-    - name: "Code Review"
+    - name: "Review"
       jira_status_name: "Code review"
+      frames: []
+
+    - name: "Merge"
+      jira_status_name: "Closed"
       frames: []
 
     - name: "Done"
       jira_status_name: "Done"
-      frames: []
-
-    - name: "Closed"
-      jira_status_name: "Closed"
       frames: []
 
 # Phase 2 features (not implemented yet)
