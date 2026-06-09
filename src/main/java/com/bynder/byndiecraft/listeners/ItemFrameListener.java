@@ -45,16 +45,28 @@ public class ItemFrameListener implements Listener {
         ItemFrame frame = (ItemFrame) event.getRightClicked();
         Player player = event.getPlayer();
 
+        // Get location info
+        int x = frame.getLocation().getBlockX();
+        int y = frame.getLocation().getBlockY();
+        int z = frame.getLocation().getBlockZ();
+        String world = frame.getWorld().getName();
+
         // ALWAYS log frame interaction for debugging
-        plugin.getLogger().info(String.format("[ItemFrame] Player %s interacted with frame at (%d, %d, %d)",
-                player.getName(),
-                frame.getLocation().getBlockX(),
-                frame.getLocation().getBlockY(),
-                frame.getLocation().getBlockZ()));
+        plugin.getLogger().info(String.format("[ItemFrame] ========================================"));
+        plugin.getLogger().info(String.format("[ItemFrame] Player %s clicked frame!", player.getName()));
+        plugin.getLogger().info(String.format("[ItemFrame] World: %s", world));
+        plugin.getLogger().info(String.format("[ItemFrame] Coordinates: X=%d, Y=%d, Z=%d", x, y, z));
+        plugin.getLogger().info(String.format("[ItemFrame] ========================================"));
+
+        // Show in chat too
+        player.sendMessage(Component.text(String.format("🔍 Clicked frame at: X=%d, Y=%d, Z=%d (World: %s)", x, y, z, world))
+                .color(NamedTextColor.GRAY));
 
         // Check if this frame is part of our Jira board
         boolean isTracked = boardManager.isTrackedFrame(frame);
         plugin.getLogger().info("[ItemFrame] Frame is tracked: " + isTracked);
+        player.sendMessage(Component.text("Frame tracked: " + isTracked)
+                .color(isTracked ? NamedTextColor.GREEN : NamedTextColor.RED));
 
         if (!isTracked) {
             player.sendMessage(Component.text("⚠ This frame is not configured in the Jira board")
