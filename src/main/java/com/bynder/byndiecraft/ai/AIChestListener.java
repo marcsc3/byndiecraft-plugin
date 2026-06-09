@@ -11,14 +11,10 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Particle;
 import org.bukkit.Sound;
-import org.bukkit.block.Block;
-import org.bukkit.block.Chest;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
-import org.bukkit.event.inventory.InventoryClickEvent;
-import org.bukkit.event.inventory.InventoryType;
-import org.bukkit.inventory.Inventory;
+import org.bukkit.event.inventory.InventoryMoveItemEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.BookMeta;
 
@@ -29,111 +25,114 @@ import java.util.Optional;
 public class AIChestListener implements Listener {
     private final ByndiecraftPlugin plugin;
     private final AITaskManager aiTaskManager;
-    private Location aiChestLocation;
+    private Location aiHopperLocation;
 
     public AIChestListener(ByndiecraftPlugin plugin, AITaskManager aiTaskManager) {
         this.plugin = plugin;
         this.aiTaskManager = aiTaskManager;
-        loadAIChestLocation();
+        loadAIHopperLocation();
     }
 
-    private void loadAIChestLocation() {
-        if (plugin.getConfig().contains("ai.chest_location")) {
-            String worldName = plugin.getConfig().getString("ai.chest_location.world");
-            int x = plugin.getConfig().getInt("ai.chest_location.x");
-            int y = plugin.getConfig().getInt("ai.chest_location.y");
-            int z = plugin.getConfig().getInt("ai.chest_location.z");
+    private void loadAIHopperLocation() {
+        if (plugin.getConfig().contains("ai.hopper_location")) {
+            String worldName = plugin.getConfig().getString("ai.hopper_location.world");
+            int x = plugin.getConfig().getInt("ai.hopper_location.x");
+            int y = plugin.getConfig().getInt("ai.hopper_location.y");
+            int z = plugin.getConfig().getInt("ai.hopper_location.z");
 
             org.bukkit.World world = Bukkit.getWorld(worldName);
             if (world != null && x != 0 && y != 0 && z != 0) {
-                aiChestLocation = new Location(world, x, y, z);
-                plugin.getLogger().info(String.format("[AIChest] AI Chest configured at: %s (%d, %d, %d)",
+                aiHopperLocation = new Location(world, x, y, z);
+                plugin.getLogger().info(String.format("[AIHopper] AI Hopper configured at: %s (%d, %d, %d)",
                         worldName, x, y, z));
             } else {
-                plugin.getLogger().warning("[AIChest] AI Chest location not properly configured");
+                plugin.getLogger().warning("[AIHopper] AI Hopper location not properly configured");
             }
         }
     }
 
-    public void setAIChestLocation(Location location) {
-        this.aiChestLocation = location;
-        plugin.getConfig().set("ai.chest_location.world", location.getWorld().getName());
-        plugin.getConfig().set("ai.chest_location.x", location.getBlockX());
-        plugin.getConfig().set("ai.chest_location.y", location.getBlockY());
-        plugin.getConfig().set("ai.chest_location.z", location.getBlockZ());
+    public void setAIHopperLocation(Location location) {
+        this.aiHopperLocation = location;
+        plugin.getConfig().set("ai.hopper_location.world", location.getWorld().getName());
+        plugin.getConfig().set("ai.hopper_location.x", location.getBlockX());
+        plugin.getConfig().set("ai.hopper_location.y", location.getBlockY());
+        plugin.getConfig().set("ai.hopper_location.z", location.getBlockZ());
         plugin.saveConfig();
-        plugin.getLogger().info(String.format("[AIChest] AI Chest location updated: %s (%d, %d, %d)",
+        plugin.getLogger().info(String.format("[AIHopper] AI Hopper location updated: %s (%d, %d, %d)",
                 location.getWorld().getName(), location.getBlockX(), location.getBlockY(), location.getBlockZ()));
     }
 
-    public Location getAIChestLocation() {
-        return aiChestLocation;
+    public Location getAIHopperLocation() {
+        return aiHopperLocation;
     }
 
     @EventHandler
-    public void onInventoryClick(InventoryClickEvent event) {
+    public void onItemMoveToHopper(InventoryMoveItemEvent event) {
         if (!plugin.getConfig().getBoolean("ai.enabled", false)) {
             return;
         }
 
-        if (aiChestLocation == null) {
+        if (aiHopperLocation == null) {
             return;
         }
 
-        if (!(event.getWhoClicked() instanceof Player)) {
+        // Check if item is moving INTO a hopper
+        if (event.getDestination().getType() != org.bukkit.event.inventory.InventoryType.HOPPER) {
             return;
         }
 
-        Player player = (Player) event.getWhoClicked();
-        Inventory inventory = event.getInventory();
-
-        // Check if this is a chest inventory
-        if (inventory.getType() != InventoryType.CHEST) {
+        // Check if this is our AI hopper
+        Location hopperLoc = event.getDestination().getLocation();
+        if (hopperLoc == null || !isAIHopper(hopperLoc)) {
             return;
         }
 
-        // Check if the chest is at the AI chest location
-        Location invLocation = inventory.getLocation();
-        if (invLocation == null || !isAIChest(invLocation)) {
+        ItemStack item = event.getItem();
+        if (item == null || item.getType() != Material.WRITTEN_BOOK) {
             return;
         }
 
-        // Check if the player is placing a book into the chest
-        ItemStack currentItem = event.getCurrentItem();
-        ItemStack cursorItem = event.getCursor();
+        plugin.getLogger().info(String.format("[AIHopper] Book detected entering AI hopper"));
 
-        ItemStack bookToProcess = null;
+        // Cancel the event - we'll consume the book
+        event.setCancelled(true);
 
-        // Detect if placing book from cursor into chest
-        if (cursorItem != null && cursorItem.getType() == Material.WRITTEN_BOOK) {
-            bookToProcess = cursorItem.clone();
-        }
-        // Detect if shift-clicking book into chest
-        else if (currentItem != null && currentItem.getType() == Material.WRITTEN_BOOK &&
-                event.isShiftClick() && event.getClickedInventory() != inventory) {
-            bookToProcess = currentItem.clone();
-        }
+        // Process the book asynchronously
+        Bukkit.getScheduler().runTask(plugin, () -> {
+            // Try to find the player who dropped the item
+            // For now, we'll use the first player near the hopper
+            Player player = findNearbyPlayer(hopperLoc);
+            if (player == null) {
+                plugin.getLogger().warning("[AIHopper] No player found near hopper, cannot process book");
+                return;
+            }
 
-        if (bookToProcess != null) {
-            plugin.getLogger().info(String.format("[AIChest] Player %s placed book in AI chest", player.getName()));
-
-            // Process the book
-            processBook(player, bookToProcess, event);
-        }
+            processBook(player, item.clone());
+        });
     }
 
-    private boolean isAIChest(Location location) {
-        if (aiChestLocation == null) {
+    private boolean isAIHopper(Location location) {
+        if (aiHopperLocation == null) {
             return false;
         }
 
-        return location.getWorld().equals(aiChestLocation.getWorld()) &&
-                location.getBlockX() == aiChestLocation.getBlockX() &&
-                location.getBlockY() == aiChestLocation.getBlockY() &&
-                location.getBlockZ() == aiChestLocation.getBlockZ();
+        return location.getWorld().equals(aiHopperLocation.getWorld()) &&
+                location.getBlockX() == aiHopperLocation.getBlockX() &&
+                location.getBlockY() == aiHopperLocation.getBlockY() &&
+                location.getBlockZ() == aiHopperLocation.getBlockZ();
     }
 
-    private void processBook(Player player, ItemStack book, InventoryClickEvent event) {
+    private Player findNearbyPlayer(Location location) {
+        double searchRadius = 10.0;
+        for (Player player : location.getWorld().getPlayers()) {
+            if (player.getLocation().distance(location) <= searchRadius) {
+                return player;
+            }
+        }
+        return null;
+    }
+
+    private void processBook(Player player, ItemStack book) {
         // Extract ticket key from book title
         BookMeta bookMeta = (BookMeta) book.getItemMeta();
         if (bookMeta == null || !bookMeta.hasTitle()) {
@@ -153,29 +152,22 @@ public class AIChestListener implements Listener {
 
         String ticketKey = ticketKeyOpt.get();
 
-        // Remove the book from cursor/inventory
-        event.setCancelled(true);
-        Bukkit.getScheduler().runTask(plugin, () -> {
-            if (event.getCursor() != null && event.getCursor().getType() == Material.WRITTEN_BOOK) {
-                event.getCursor().setAmount(0);
-            } else if (event.getCurrentItem() != null) {
-                event.getCurrentItem().setAmount(0);
-            }
-        });
-
         // Visual and audio feedback
         if (plugin.getConfig().getBoolean("ai.visual_effects", true)) {
             player.playSound(player.getLocation(), Sound.BLOCK_ENCHANTMENT_TABLE_USE, 1.0f, 1.0f);
 
-            // Spawn particles above chest
-            Location chestLoc = aiChestLocation.clone().add(0.5, 1, 0.5);
-            player.spawnParticle(Particle.ENCHANT, chestLoc, 50, 0.5, 0.5, 0.5, 0.1);
+            // Spawn particles above hopper
+            Location hopperLoc = aiHopperLocation.clone().add(0.5, 1, 0.5);
+            player.spawnParticle(Particle.ENCHANT, hopperLoc, 50, 0.5, 0.5, 0.5, 0.1);
+            player.spawnParticle(Particle.PORTAL, hopperLoc, 30, 0.3, 0.3, 0.3, 0.5);
         }
 
         player.sendMessage(Component.text("🤖 Claude is implementing " + ticketKey + "...")
                 .color(NamedTextColor.LIGHT_PURPLE));
+        player.sendMessage(Component.text("The hopper has consumed your book!")
+                .color(NamedTextColor.GRAY));
 
-        plugin.getLogger().info(String.format("[AIChest] Starting AI task for ticket: %s", ticketKey));
+        plugin.getLogger().info(String.format("[AIHopper] Starting AI task for ticket: %s", ticketKey));
 
         // Trigger AI task asynchronously
         aiTaskManager.implementTicket(player, ticketKey, book).thenAccept(result -> {
@@ -201,9 +193,12 @@ public class AIChestListener implements Listener {
 
             if (plugin.getConfig().getBoolean("ai.visual_effects", true)) {
                 player.playSound(player.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 1.0f, 1.0f);
+                // Spawn success particles
+                Location hopperLoc = aiHopperLocation.clone().add(0.5, 1, 0.5);
+                player.spawnParticle(Particle.HAPPY_VILLAGER, hopperLoc, 20, 0.5, 0.5, 0.5, 0.1);
             }
 
-            plugin.getLogger().info(String.format("[AIChest] Success! PR: %s", result.getPrUrl()));
+            plugin.getLogger().info(String.format("[AIHopper] Success! PR: %s", result.getPrUrl()));
         } else {
             // Failure - return book with error
             returnBookWithError(player, book, result.getError());
@@ -215,7 +210,7 @@ public class AIChestListener implements Listener {
                 player.playSound(player.getLocation(), Sound.ENTITY_VILLAGER_NO, 1.0f, 1.0f);
             }
 
-            plugin.getLogger().warning(String.format("[AIChest] Failed: %s", result.getError()));
+            plugin.getLogger().warning(String.format("[AIHopper] Failed: %s", result.getError()));
         }
     }
 

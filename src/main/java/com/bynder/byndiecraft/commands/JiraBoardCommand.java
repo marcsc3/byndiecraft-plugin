@@ -64,8 +64,8 @@ public class JiraBoardCommand implements CommandExecutor, TabCompleter {
             case "refresh":
                 return handleRefresh(sender);
 
-            case "setaichest":
-                return handleSetAIChest(sender);
+            case "setaihopper":
+                return handleSetAIHopper(sender);
 
             case "aiinfo":
                 return handleAIInfo(sender);
@@ -209,7 +209,7 @@ public class JiraBoardCommand implements CommandExecutor, TabCompleter {
         return null;
     }
 
-    private boolean handleSetAIChest(CommandSender sender) {
+    private boolean handleSetAIHopper(CommandSender sender) {
         if (!(sender instanceof Player player)) {
             sender.sendMessage(Component.text("This command can only be used by players!")
                     .color(NamedTextColor.RED));
@@ -224,22 +224,22 @@ public class JiraBoardCommand implements CommandExecutor, TabCompleter {
 
         // Get the block the player is looking at
         Block targetBlock = player.getTargetBlockExact(5);
-        if (targetBlock == null || targetBlock.getType() != org.bukkit.Material.CHEST) {
-            player.sendMessage(Component.text("⚠ You must be looking at a chest!")
+        if (targetBlock == null || targetBlock.getType() != org.bukkit.Material.HOPPER) {
+            player.sendMessage(Component.text("⚠ You must be looking at a hopper!")
                     .color(NamedTextColor.YELLOW));
-            player.sendMessage(Component.text("Look at a chest and run this command again")
+            player.sendMessage(Component.text("Look at a hopper and run this command again")
                     .color(NamedTextColor.GRAY));
             return true;
         }
 
-        Location chestLocation = targetBlock.getLocation();
+        Location hopperLocation = targetBlock.getLocation();
         var aiChestListener = plugin.getAIChestListener();
         if (aiChestListener != null) {
-            aiChestListener.setAIChestLocation(chestLocation);
-            player.sendMessage(Component.text("✓ AI Chest set at: " +
-                    String.format("(%d, %d, %d)", chestLocation.getBlockX(), chestLocation.getBlockY(), chestLocation.getBlockZ()))
+            aiChestListener.setAIHopperLocation(hopperLocation);
+            player.sendMessage(Component.text("✓ AI Hopper set at: " +
+                    String.format("(%d, %d, %d)", hopperLocation.getBlockX(), hopperLocation.getBlockY(), hopperLocation.getBlockZ()))
                     .color(NamedTextColor.GREEN));
-            player.sendMessage(Component.text("Place written books with Jira ticket keys in this chest to trigger AI implementation!")
+            player.sendMessage(Component.text("Throw written books with Jira ticket keys into this hopper to trigger AI implementation!")
                     .color(NamedTextColor.GRAY));
         } else {
             player.sendMessage(Component.text("⚠ AI system not initialized")
@@ -270,18 +270,18 @@ public class JiraBoardCommand implements CommandExecutor, TabCompleter {
 
         var aiChestListener = plugin.getAIChestListener();
         if (aiChestListener != null) {
-            Location aiChestLoc = aiChestListener.getAIChestLocation();
-            if (aiChestLoc != null) {
-                sender.sendMessage(Component.text(String.format("AI Chest: %s (%d, %d, %d)",
-                        aiChestLoc.getWorld().getName(),
-                        aiChestLoc.getBlockX(),
-                        aiChestLoc.getBlockY(),
-                        aiChestLoc.getBlockZ()))
+            Location aiHopperLoc = aiChestListener.getAIHopperLocation();
+            if (aiHopperLoc != null) {
+                sender.sendMessage(Component.text(String.format("AI Hopper: %s (%d, %d, %d)",
+                        aiHopperLoc.getWorld().getName(),
+                        aiHopperLoc.getBlockX(),
+                        aiHopperLoc.getBlockY(),
+                        aiHopperLoc.getBlockZ()))
                         .color(NamedTextColor.GREEN));
             } else {
-                sender.sendMessage(Component.text("AI Chest: Not configured")
+                sender.sendMessage(Component.text("AI Hopper: Not configured")
                         .color(NamedTextColor.YELLOW));
-                sender.sendMessage(Component.text("Use /jiraboard setaichest to configure")
+                sender.sendMessage(Component.text("Use /jiraboard setaihopper to configure")
                         .color(NamedTextColor.GRAY));
             }
         }
@@ -305,8 +305,8 @@ public class JiraBoardCommand implements CommandExecutor, TabCompleter {
                 .append(Component.text(" - Rebuild board with fresh Jira data").color(NamedTextColor.GRAY)));
         sender.sendMessage(Component.text(""));
         sender.sendMessage(Component.text("=== AI Commands (Phase 2) ===").color(NamedTextColor.LIGHT_PURPLE));
-        sender.sendMessage(Component.text("/jiraboard setaichest").color(NamedTextColor.YELLOW)
-                .append(Component.text(" - Set AI chest (look at chest)").color(NamedTextColor.GRAY)));
+        sender.sendMessage(Component.text("/jiraboard setaihopper").color(NamedTextColor.YELLOW)
+                .append(Component.text(" - Set AI hopper (look at hopper)").color(NamedTextColor.GRAY)));
         sender.sendMessage(Component.text("/jiraboard aiinfo").color(NamedTextColor.YELLOW)
                 .append(Component.text(" - Show AI system status").color(NamedTextColor.GRAY)));
     }
@@ -315,7 +315,7 @@ public class JiraBoardCommand implements CommandExecutor, TabCompleter {
     @Override
     public List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command, @NotNull String alias, @NotNull String[] args) {
         if (args.length == 1) {
-            return Arrays.asList("info", "setup", "spawn", "addcolumn", "refresh", "setaichest", "aiinfo", "debug", "help");
+            return Arrays.asList("info", "setup", "spawn", "addcolumn", "refresh", "setaihopper", "aiinfo", "debug", "help");
         }
 
         if (args.length == 2 && args[0].equalsIgnoreCase("addcolumn")) {

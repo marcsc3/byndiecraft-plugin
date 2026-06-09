@@ -53,8 +53,9 @@ board:
 ai:
   enabled: true
 
-  # AI Chest location (set via /jiraboard setaichest command)
-  chest_location:
+  # AI Hopper location (set via /jiraboard setaihopper command)
+  # Players throw books into this hopper to trigger AI implementation
+  hopper_location:
     world: "world"
     x: 0
     y: 0
