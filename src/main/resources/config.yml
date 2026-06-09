@@ -19,6 +19,13 @@ board:
   # Minecraft world name where the board is located
   world: "world"
 
+  # Fixed anchor point where the board spawns (top-left corner)
+  # If not set, /jiraboard spawn uses the player's current location
+  anchor:
+    x: 100
+    y: 64
+    z: 200
+
   # Status columns configuration
   # Each column represents a Jira status and contains item frame locations
   columns:

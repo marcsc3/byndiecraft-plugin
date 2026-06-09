@@ -2,9 +2,11 @@ package com.bynder.byndiecraft.commands;
 
 import com.bynder.byndiecraft.ByndiecraftPlugin;
 import com.bynder.byndiecraft.board.BoardManager;
+import com.bynder.byndiecraft.board.BoardSpawner;
 import com.bynder.byndiecraft.board.StatusColumn;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
+import org.bukkit.Location;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -20,10 +22,12 @@ import java.util.List;
 public class JiraBoardCommand implements CommandExecutor, TabCompleter {
     private final ByndiecraftPlugin plugin;
     private final BoardManager boardManager;
+    private final BoardSpawner boardSpawner;
 
-    public JiraBoardCommand(ByndiecraftPlugin plugin, BoardManager boardManager) {
+    public JiraBoardCommand(ByndiecraftPlugin plugin, BoardManager boardManager, BoardSpawner boardSpawner) {
         this.plugin = plugin;
         this.boardManager = boardManager;
+        this.boardSpawner = boardSpawner;
     }
 
     @Override
@@ -49,6 +53,9 @@ public class JiraBoardCommand implements CommandExecutor, TabCompleter {
                     return true;
                 }
                 return handleAddColumn(sender, args[1], args[2]);
+
+            case "spawn":
+                return handleSpawn(sender);
 
             case "refresh":
                 return handleRefresh(sender);
@@ -112,12 +119,55 @@ public class JiraBoardCommand implements CommandExecutor, TabCompleter {
         return true;
     }
 
-    private boolean handleRefresh(CommandSender sender) {
-        sender.sendMessage(Component.text("⚠ Bi-directional sync not yet implemented (Phase 2 feature)")
-                .color(NamedTextColor.YELLOW));
-        sender.sendMessage(Component.text("Currently, only Minecraft → Jira updates are supported.")
-                .color(NamedTextColor.GRAY));
+    private boolean handleSpawn(CommandSender sender) {
+        if (!(sender instanceof Player player)) {
+            sender.sendMessage(Component.text("This command can only be used by players!")
+                    .color(NamedTextColor.RED));
+            return true;
+        }
+
+        Location anchor = getAnchorLocation(player);
+        if (anchor == null) {
+            player.sendMessage(Component.text("⚠ Board anchor not configured! Set board.anchor in config.yml")
+                    .color(NamedTextColor.YELLOW));
+            player.sendMessage(Component.text("Using your current location as anchor...")
+                    .color(NamedTextColor.GRAY));
+            anchor = player.getLocation().getBlock().getLocation();
+        }
+
+        boardSpawner.spawn(player, anchor);
         return true;
+    }
+
+    private boolean handleRefresh(CommandSender sender) {
+        if (!(sender instanceof Player player)) {
+            sender.sendMessage(Component.text("This command can only be used by players!")
+                    .color(NamedTextColor.RED));
+            return true;
+        }
+
+        Location anchor = getAnchorLocation(player);
+        if (anchor == null) {
+            anchor = player.getLocation().getBlock().getLocation();
+        }
+
+        boardSpawner.spawn(player, anchor);
+        return true;
+    }
+
+    private Location getAnchorLocation(Player player) {
+        var config = plugin.getConfig();
+        if (config.contains("board.anchor")) {
+            String worldName = config.getString("board.world", "world");
+            var world = org.bukkit.Bukkit.getWorld(worldName);
+            if (world == null) return null;
+
+            int x = config.getInt("board.anchor.x");
+            int y = config.getInt("board.anchor.y");
+            int z = config.getInt("board.anchor.z");
+            return new Location(world, x, y, z);
+        }
+        return null;
     }
 
     private void sendHelp(CommandSender sender) {
@@ -128,15 +178,17 @@ public class JiraBoardCommand implements CommandExecutor, TabCompleter {
                 .append(Component.text(" - Setup guide").color(NamedTextColor.GRAY)));
         sender.sendMessage(Component.text("/jiraboard addcolumn <name> <jiraStatus>").color(NamedTextColor.YELLOW)
                 .append(Component.text(" - Add a status column").color(NamedTextColor.GRAY)));
+        sender.sendMessage(Component.text("/jiraboard spawn").color(NamedTextColor.YELLOW)
+                .append(Component.text(" - Spawn/create the Jira board in-world").color(NamedTextColor.GRAY)));
         sender.sendMessage(Component.text("/jiraboard refresh").color(NamedTextColor.YELLOW)
-                .append(Component.text(" - Sync with Jira (Phase 2)").color(NamedTextColor.GRAY)));
+                .append(Component.text(" - Rebuild board with fresh Jira data").color(NamedTextColor.GRAY)));
     }
 
     @Nullable
     @Override
     public List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command, @NotNull String alias, @NotNull String[] args) {
         if (args.length == 1) {
-            return Arrays.asList("info", "setup", "addcolumn", "refresh", "help");
+            return Arrays.asList("info", "setup", "spawn", "addcolumn", "refresh", "help");
         }
 
         if (args.length == 2 && args[0].equalsIgnoreCase("addcolumn")) {

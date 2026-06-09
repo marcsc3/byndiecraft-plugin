@@ -1,6 +1,7 @@
 package com.bynder.byndiecraft;
 
 import com.bynder.byndiecraft.board.BoardManager;
+import com.bynder.byndiecraft.board.BoardSpawner;
 import com.bynder.byndiecraft.board.JiraBoard;
 import com.bynder.byndiecraft.commands.JiraBoardCommand;
 import com.bynder.byndiecraft.jira.JiraClient;
@@ -60,10 +61,13 @@ public class ByndiecraftPlugin extends JavaPlugin {
         Bukkit.getPluginManager().registerEvents(itemFrameListener, this);
         getLogger().info("✓ Event listeners registered");
 
+        // Initialize board spawner
+        BoardSpawner boardSpawner = new BoardSpawner(this, jiraClient, boardManager);
+
         // Register commands
         PluginCommand jiraBoardCommand = getCommand("jiraboard");
         if (jiraBoardCommand != null) {
-            JiraBoardCommand commandExecutor = new JiraBoardCommand(this, boardManager);
+            JiraBoardCommand commandExecutor = new JiraBoardCommand(this, boardManager, boardSpawner);
             jiraBoardCommand.setExecutor(commandExecutor);
             jiraBoardCommand.setTabCompleter(commandExecutor);
             getLogger().info("✓ Commands registered: /jiraboard");

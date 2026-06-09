@@ -8,10 +8,12 @@ Byndiecraft allows you to visualize and interact with your Jira board directly i
 
 ### Features
 
-- ✅ **Visual Jira Board**: Organize item frames as status columns (To Do, In Progress, Done)
-- ✅ **Book-Based Tickets**: Written books represent Jira tickets
+- ✅ **Auto Board Spawning**: Run `/jiraboard spawn` to build the entire board from live Jira data
+- ✅ **Visual Jira Board**: Dynamic columns with sign headers (To Do, In Progress, Done)
+- ✅ **Book-Based Tickets**: Written books auto-generated from Jira tickets
 - ✅ **Real-Time Sync**: Moving books triggers Jira API calls to update ticket status
 - ✅ **Instant Feedback**: Players receive chat messages on successful/failed updates
+- ✅ **Refresh**: Run `/jiraboard refresh` to tear down and rebuild with fresh data
 - 🚧 **Bi-directional Sync**: (Phase 2) Jira changes reflect back in Minecraft
 
 ## 🚀 Quick Start
@@ -77,70 +79,62 @@ Byndiecraft allows you to visualize and interact with your Jira board directly i
 
 ## 🎯 How to Use
 
-### 1. Set Up Your Board
+### 1. Spawn the Board
 
-Build a wall of item frames in Minecraft organized into columns:
-
+Simply run the command in-game:
 ```
-[ To Do ]  [ In Progress ]  [ Done ]
-[Frame] [Frame]  [Frame] [Frame]  [Frame] [Frame]
-[Frame] [Frame]  [Frame] [Frame]  [Frame] [Frame]
-[Frame] [Frame]  [Frame] [Frame]  [Frame] [Frame]
+/jiraboard spawn
 ```
 
-### 2. Configure Columns
+This will:
+- Fetch all tickets from your Jira project
+- Build a backing wall with item frames at the configured anchor point
+- Place sign headers above each column (To Do, In Progress, Done)
+- Create written books for each ticket and place them in the correct column
+- Columns grow dynamically based on ticket count (capped at 10 per column)
 
-Edit `config.yml` to map columns to Jira statuses:
+### 2. Configure the Anchor Point
+
+Set where the board spawns in `config.yml`:
 
 ```yaml
 board:
   world: "world"
-  columns:
-    - name: "To Do"
-      jira_status_name: "To Do"
-      frames:
-        - { x: 100, y: 64, z: 200 }
-        - { x: 100, y: 65, z: 200 }
-    
-    - name: "In Progress"
-      jira_status_name: "In Progress"
-      frames:
-        - { x: 105, y: 64, z: 200 }
+  anchor:
+    x: 100
+    y: 64
+    z: 200
 ```
 
-Or use the command:
-```
-/jiraboard addcolumn "To Do" "To Do"
-```
+To find coordinates: stand where you want the board's top-left corner and press **F3**.
 
-### 3. Create Ticket Books
+If no anchor is configured, the board spawns at the player's current position.
 
-Create a **written book** with the title format:
-```
-TAP-123: Fix login bug
-```
+### 3. Move Tickets!
 
-or simply:
-```
-TAP-123
-```
-
-The plugin will extract the ticket key and validate it against Jira.
-
-### 4. Move Tickets!
-
-- Place the book in an item frame in the "To Do" column
-- When you move it to "In Progress", Jira updates automatically!
+- Pick up a book from one column's item frame
+- Place it in a different column's item frame
+- Jira updates automatically!
 - You'll receive a chat message: `✓ TAP-123 moved to 'In Progress'`
+
+### 4. Refresh the Board
+
+To rebuild the board with fresh Jira data:
+```
+/jiraboard refresh
+```
+
+This clears the existing board and respawns it with current ticket statuses.
 
 ## 📋 Commands
 
 | Command | Description | Permission |
 |---------|-------------|------------|
+| `/jiraboard spawn` | Spawn/create the Jira board in-world | `byndiecraft.admin` |
+| `/jiraboard refresh` | Rebuild board with fresh Jira data | `byndiecraft.admin` |
 | `/jiraboard info` | Show board configuration | `byndiecraft.use` |
 | `/jiraboard setup` | Display setup guide | `byndiecraft.admin` |
 | `/jiraboard addcolumn <name> <status>` | Add a status column | `byndiecraft.admin` |
-| `/jiraboard refresh` | Manual sync (Phase 2) | `byndiecraft.admin` |
 
 ## 🔧 Configuration
 
@@ -155,44 +149,55 @@ jira:
 
 board:
   world: "world"
+  anchor:
+    x: 100
+    y: 64
+    z: 200
   columns:
     - name: "To Do"
       jira_status_name: "To Do"
+      frames: []
+    - name: "In Progress"
+      jira_status_name: "In Progress"
+      frames: []
+    - name: "Done"
+      jira_status_name: "Done"
       frames: []
 
 debug: false  # Set to true for verbose logging
 ```
 
-### Finding Frame Coordinates
+### Finding Anchor Coordinates
 
-Stand next to an item frame and run:
+Stand where you want the board's top-left corner and press **F3** to see your coordinates, or run:
 ```
 /execute at @p run tp ~ ~ ~
 ```
 
-This shows your coordinates. Use these in the config.
-
 ## 🎬 Demo Script (Hackathon)
 
-1. **Show the setup**: Minecraft Jira board with labeled columns
-2. **Create books**: Hand out written books with real Jira ticket keys
+1. **Spawn the board**: Run `/jiraboard spawn` — watch the board build itself from live Jira data
+2. **Show the board**: Point out columns with sign headers and books with ticket details
 3. **Simulate stand-up**:
-   - Player 1: "I'm working on TAP-123" → moves book to "In Progress"
+   - Player 1: "I'm picking up TAP-302795" → moves book to "In Progress"
    - Show browser with Jira board updating live
-   - Player 2: "I finished TAP-456" → moves book to "Done"
+   - Player 2: "I finished TAP-12783" → moves book to "Done"
    - Show browser update again
-4. **Error handling**: Try invalid ticket key → see error message
-5. **Phase 2 demo** (if implemented): Run `/jiraboard refresh`
+4. **Refresh**: Run `/jiraboard refresh` to show it rebuilds with current state
+5. **Error handling**: Try invalid ticket key → see error message
 
 ## 🏗 Architecture
 
 ```
 Minecraft Server (Paper)
 ├── ByndiecraftPlugin (Main)
+├── BoardSpawner (Builds board: frames, signs, books)
 ├── ItemFrameListener (Detects book movements)
 ├── BoardManager (Tracks frame coordinates)
 ├── JiraClient (HTTP client for Jira API)
-└── Commands (Board management)
+│   ├── searchIssues() — JQL search for project tickets
+│   └── transitionIssue() — Move ticket to new status
+└── Commands (/jiraboard spawn, refresh, info)
          ↓
     Jira REST API
 ```
@@ -243,12 +248,13 @@ build/libs/byndiecraft-plugin-1.0.0-SNAPSHOT.jar
 
 ## 🚀 Phase 2 Features (Roadmap)
 
-- [ ] Bi-directional sync (Jira → Minecraft)
-- [ ] Polling mechanism (every 60 seconds)
+- [ ] Bi-directional sync (Jira → Minecraft via polling)
+- [ ] Auto-refresh on interval (every 60 seconds)
 - [ ] Jira webhooks for real-time updates
-- [ ] Visual effects (particles, sounds)
-- [ ] Multi-board support
+- [ ] Visual effects (particles, sounds on spawn/transition)
+- [ ] Multi-board support (multiple projects)
 - [ ] Persistent board state in database
+- [ ] Configurable max tickets per column
 
 ## 👥 Team Byndiecraft
 
