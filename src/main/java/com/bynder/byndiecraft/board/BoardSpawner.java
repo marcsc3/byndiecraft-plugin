@@ -258,8 +258,8 @@ public class BoardSpawner {
                         column.getJiraStatusName().toLowerCase(), Collections.emptyList());
                 int ticketCount = columnTickets.size();
 
-                // Backing wall
-                for (int y = currentY + 1; y >= currentY - ticketCount; y--) {
+                // Backing wall — extend to max height so all columns have equal space
+                for (int y = currentY + 1; y >= currentY - maxTicketsInColumn; y--) {
                     for (int dx = 0; dx < 2; dx++) {
                         Block backing = world.getBlockAt(colX + dx, y, baseZ - 1);
                         backing.setType(Material.OAK_PLANKS);
@@ -279,20 +279,23 @@ public class BoardSpawner {
                     sign.update();
                 }
 
-                // Place item frames with books
-                for (int i = 0; i < ticketCount; i++) {
-                    JiraTicket ticket = columnTickets.get(i);
+                // Place item frames for the full column height
+                for (int i = 0; i < maxTicketsInColumn; i++) {
                     int frameY = currentY - i;
                     Location frameLoc = new Location(world, colX, frameY, baseZ);
 
                     ItemFrame frame = (ItemFrame) world.spawnEntity(frameLoc, EntityType.ITEM_FRAME);
                     frame.setFacingDirection(BlockFace.SOUTH);
 
-                    ItemStack book = createTicketBook(ticket);
-                    frame.setItem(book);
+                    // Fill with book if ticket exists at this slot
+                    if (i < ticketCount) {
+                        JiraTicket ticket = columnTickets.get(i);
+                        ItemStack book = createTicketBook(ticket);
+                        frame.setItem(book);
+                        boardManager.cacheTicketStatus(ticket.getKey(), column.getJiraStatusName());
+                    }
 
                     column.addFrameLocation(frameLoc);
-                    boardManager.cacheTicketStatus(ticket.getKey(), column.getJiraStatusName());
                 }
             }
 
@@ -332,7 +335,8 @@ public class BoardSpawner {
             List<JiraTicket> columnTickets = ticketsByStatus.getOrDefault(column.getJiraStatusName().toLowerCase(), Collections.emptyList());
             int ticketCount = columnTickets.size();
 
-            for (int y = baseY + 1; y >= baseY - ticketCount; y--) {
+            // Backing wall — extend to max height so all columns have equal space
+            for (int y = baseY + 1; y >= baseY - maxHeight; y--) {
                 for (int dx = 0; dx < 2; dx++) {
                     Block backing = world.getBlockAt(colX + dx, y, baseZ - 1);
                     backing.setType(Material.OAK_PLANKS);
@@ -353,19 +357,22 @@ public class BoardSpawner {
 
             column.getFrameLocations().forEach(column::removeFrameLocation);
 
-            for (int i = 0; i < ticketCount; i++) {
-                JiraTicket ticket = columnTickets.get(i);
+            // Place item frames for the full column height
+            for (int i = 0; i < maxHeight; i++) {
                 int frameY = baseY - i;
                 Location frameLoc = new Location(world, colX, frameY, baseZ);
 
                 ItemFrame frame = (ItemFrame) world.spawnEntity(frameLoc, EntityType.ITEM_FRAME);
                 frame.setFacingDirection(BlockFace.SOUTH);
 
-                ItemStack book = createTicketBook(ticket);
-                frame.setItem(book);
+                if (i < ticketCount) {
+                    JiraTicket ticket = columnTickets.get(i);
+                    ItemStack book = createTicketBook(ticket);
+                    frame.setItem(book);
+                    boardManager.cacheTicketStatus(ticket.getKey(), column.getJiraStatusName());
+                }
 
                 column.addFrameLocation(frameLoc);
-                boardManager.cacheTicketStatus(ticket.getKey(), column.getJiraStatusName());
             }
         }
     }
