@@ -23,9 +23,9 @@ board:
   # Fixed anchor point where the board spawns (top-left corner)
   # If not set, /jiraboard spawn uses the player's current location
   anchor:
-    x: 100
-    y: 100
-    z: 200
+    x: 0
+    y: -60
+    z: 0
 
   # Status columns configuration
   # "name" is displayed on the Minecraft sign; "jira_status_name" must match the API status
