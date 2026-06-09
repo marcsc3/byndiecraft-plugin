@@ -43,11 +43,11 @@ board:
       frames: []
 
     - name: "Merge"
-      jira_status_name: "Closed"
+      jira_status_name: "Verified"
       frames: []
 
     - name: "Done"
-      jira_status_name: "Done"
+      jira_status_name: "Closed"
       frames: []
 
 # Phase 2 features (not implemented yet)
