@@ -25,7 +25,6 @@ public class BoardSpawner {
     private final BoardManager boardManager;
 
     private static final int COLUMN_SPACING = 4;
-    private static final int MAX_TICKETS_PER_COLUMN = 10;
 
     public BoardSpawner(ByndiecraftPlugin plugin, JiraClient jiraClient, BoardManager boardManager) {
         this.plugin = plugin;
@@ -114,13 +113,6 @@ public class BoardSpawner {
         World world = anchor.getWorld();
         if (world == null) return;
 
-        List<StatusColumn> columns = boardManager.getBoard().getColumns();
-        if (columns.isEmpty()) {
-            player.sendMessage(Component.text("⚠ No columns configured! Use /jiraboard addcolumn first.")
-                    .color(NamedTextColor.YELLOW));
-            return;
-        }
-
         // Group tickets by their current status (case-insensitive matching)
         Map<String, List<JiraTicket>> ticketsByStatus = tickets.stream()
                 .collect(Collectors.groupingBy(t -> t.getStatus().toLowerCase()));
@@ -129,8 +121,36 @@ public class BoardSpawner {
             plugin.getLogger().info("Ticket statuses found: " + ticketsByStatus.keySet());
         }
 
+        // Build columns dynamically: start with configured ones, then add any new statuses
+        List<StatusColumn> columns = new ArrayList<>(boardManager.getBoard().getColumns());
+        Set<String> knownStatuses = columns.stream()
+                .map(c -> c.getJiraStatusName().toLowerCase())
+                .collect(Collectors.toSet());
+
+        for (String status : ticketsByStatus.keySet()) {
+            if (!knownStatuses.contains(status)) {
+                String displayName = tickets.stream()
+                        .filter(t -> t.getStatus().toLowerCase().equals(status))
+                        .map(JiraTicket::getStatus)
+                        .findFirst()
+                        .orElse(status);
+                columns.add(new StatusColumn(displayName, displayName));
+                if (plugin.getConfigLoader().isDebugMode()) {
+                    plugin.getLogger().info("Auto-created column for status: " + displayName);
+                }
+            }
+        }
+
+        boardManager.getBoard().setColumns(columns);
+
+        // Find tallest column to size the backing wall
+        int maxHeight = ticketsByStatus.values().stream()
+                .mapToInt(List::size)
+                .max()
+                .orElse(0);
+
         // Clear existing board
-        clearBoard(anchor, columns.size(), MAX_TICKETS_PER_COLUMN);
+        clearBoard(anchor, columns.size(), maxHeight);
 
         int baseX = anchor.getBlockX();
         int baseY = anchor.getBlockY();
@@ -140,8 +160,11 @@ public class BoardSpawner {
             StatusColumn column = columns.get(colIdx);
             int colX = baseX + (colIdx * COLUMN_SPACING);
 
+            List<JiraTicket> columnTickets = ticketsByStatus.getOrDefault(column.getJiraStatusName().toLowerCase(), Collections.emptyList());
+            int ticketCount = columnTickets.size();
+
             // Place backing wall for this column (includes sign row at baseY + 1)
-            for (int y = baseY + 1; y >= baseY - MAX_TICKETS_PER_COLUMN; y--) {
+            for (int y = baseY + 1; y >= baseY - ticketCount; y--) {
                 for (int dx = 0; dx < 2; dx++) {
                     Block backing = world.getBlockAt(colX + dx, y, baseZ - 1);
                     backing.setType(Material.OAK_PLANKS);
@@ -160,10 +183,6 @@ public class BoardSpawner {
                 sign.getSide(Side.FRONT).line(1, Component.text(column.getName()).color(NamedTextColor.DARK_BLUE));
                 sign.update();
             }
-
-            // Get tickets for this column's status (case-insensitive)
-            List<JiraTicket> columnTickets = ticketsByStatus.getOrDefault(column.getJiraStatusName().toLowerCase(), Collections.emptyList());
-            int ticketCount = Math.min(columnTickets.size(), MAX_TICKETS_PER_COLUMN);
 
             // Clear existing frame locations for this column
             column.getFrameLocations().forEach(column::removeFrameLocation);

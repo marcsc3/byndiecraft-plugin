@@ -26,6 +26,11 @@ public class JiraBoard {
         columns.add(column);
     }
 
+    public void setColumns(List<StatusColumn> newColumns) {
+        columns.clear();
+        columns.addAll(newColumns);
+    }
+
     public void removeColumn(StatusColumn column) {
         columns.remove(column);
     }
