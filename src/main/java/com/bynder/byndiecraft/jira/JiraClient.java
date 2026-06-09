@@ -206,6 +206,7 @@ public class JiraClient {
                 fieldsArray.add("summary");
                 fieldsArray.add("status");
                 fieldsArray.add("issuetype");
+                fieldsArray.add("description");
                 fieldsArray.add("parent");
                 requestJson.add("fields", fieldsArray);
 
@@ -250,6 +251,11 @@ public class JiraClient {
                             issueType = fields.getAsJsonObject("issuetype").get("name").getAsString();
                         }
 
+                        String description = null;
+                        if (fields.has("description") && !fields.get("description").isJsonNull()) {
+                            description = extractTextFromAdf(fields.getAsJsonObject("description"));
+                        }
+
                         String parentKey = null;
                         String parentSummary = null;
                         if (fields.has("parent") && !fields.get("parent").isJsonNull()) {
@@ -261,7 +267,7 @@ public class JiraClient {
                             }
                         }
 
-                        tickets.add(new JiraTicket(key, summary, statusName, statusId, parentKey, parentSummary, issueType));
+                        tickets.add(new JiraTicket(key, summary, statusName, statusId, parentKey, parentSummary, issueType, description));
                     }
 
                     if (debugMode) {
@@ -275,6 +281,31 @@ public class JiraClient {
                 return new ArrayList<>();
             }
         });
+    }
+
+    private String extractTextFromAdf(JsonObject adf) {
+        StringBuilder sb = new StringBuilder();
+        extractTextNodes(adf, sb);
+        return sb.toString().trim();
+    }
+
+    private void extractTextNodes(JsonObject node, StringBuilder sb) {
+        if (node.has("type") && "text".equals(node.get("type").getAsString())) {
+            if (node.has("text")) {
+                sb.append(node.get("text").getAsString());
+            }
+        }
+        if (node.has("content")) {
+            for (var child : node.getAsJsonArray("content")) {
+                if (child.isJsonObject()) {
+                    extractTextNodes(child.getAsJsonObject(), sb);
+                }
+            }
+            String type = node.has("type") ? node.get("type").getAsString() : "";
+            if ("paragraph".equals(type) || "heading".equals(type)) {
+                sb.append("\n");
+            }
+        }
     }
 
     public void shutdown() {

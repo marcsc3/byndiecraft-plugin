@@ -374,10 +374,21 @@ public class BoardSpawner {
         ItemStack book = new ItemStack(Material.WRITTEN_BOOK);
         BookMeta meta = (BookMeta) book.getItemMeta();
 
-        meta.setTitle(ticket.getKey() + ": " + ticket.getSummary());
+        String fullTitle = ticket.getKey() + ": " + ticket.getSummary();
+        // Minecraft book titles are capped at 32 chars
+        String bookTitle = fullTitle.length() > 32 ? fullTitle.substring(0, 32) : fullTitle;
+        meta.setTitle(bookTitle);
         meta.setAuthor("Jira");
-        meta.displayName(Component.text(ticket.getKey() + ": " + ticket.getSummary()).color(getColorForType(ticket.getIssueType())));
+        meta.displayName(Component.text(fullTitle).color(getColorForType(ticket.getIssueType())));
+
         meta.addPages(Component.text(ticket.getKey() + "\n\n" + ticket.getSummary() + "\n\nType: " + ticket.getIssueType() + "\nStatus: " + ticket.getStatus()));
+
+        String desc = ticket.getDescription();
+        if (desc != null && !desc.isEmpty()) {
+            // Book pages have a ~256 char display limit, split if needed
+            String pageText = desc.length() > 256 ? desc.substring(0, 256) + "..." : desc;
+            meta.addPages(Component.text(pageText));
+        }
 
         book.setItemMeta(meta);
         return book;

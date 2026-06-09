@@ -112,14 +112,29 @@ public class ItemFrameListener implements Listener {
         }
 
         BookMeta bookMeta = (BookMeta) item.getItemMeta();
-        if (bookMeta == null || !bookMeta.hasTitle()) {
-            plugin.getLogger().warning("[ItemFrame] Book has no title!");
-            player.sendMessage(Component.text("⚠ Book must have a title with a Jira ticket key (e.g., TAP-123)")
+        if (bookMeta == null) {
+            plugin.getLogger().warning("[ItemFrame] Book has no metadata!");
+            player.sendMessage(Component.text("⚠ Book must have a title with a Jira ticket key (e.g., SHARE-123)")
                     .color(NamedTextColor.YELLOW));
             return;
         }
 
+        // Try book title first, then fall back to display name
         String bookTitle = bookMeta.getTitle();
+        if (bookTitle == null || bookTitle.isEmpty()) {
+            var displayName = bookMeta.displayName();
+            if (displayName != null) {
+                bookTitle = net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer.plainText().serialize(displayName);
+            }
+        }
+
+        if (bookTitle == null || bookTitle.isEmpty()) {
+            plugin.getLogger().warning("[ItemFrame] Book has no title!");
+            player.sendMessage(Component.text("⚠ Book must have a title with a Jira ticket key (e.g., SHARE-123)")
+                    .color(NamedTextColor.YELLOW));
+            return;
+        }
+
         plugin.getLogger().info("[ItemFrame] Book title: \"" + bookTitle + "\"");
 
         Optional<String> ticketKeyOpt = BookParser.extractTicketKey(bookTitle);
