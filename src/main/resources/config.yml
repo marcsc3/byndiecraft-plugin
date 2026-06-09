@@ -28,25 +28,26 @@ board:
 
   # Status columns configuration
   # Each column represents a Jira status and contains item frame locations
+  # Column names are display names; jira_status_name must match the API status exactly
   columns:
-    - name: "Ready to be Picked Up"
-      jira_status_name: "Ready to be Picked Up"
+    - name: "Backlog"
+      jira_status_name: "Backlog"
       frames: []
 
     - name: "In Progress"
       jira_status_name: "In Progress"
       frames: []
 
-    - name: "Review"
-      jira_status_name: "Review"
-      frames: []
-
-    - name: "Merge"
-      jira_status_name: "Merge"
+    - name: "Code Review"
+      jira_status_name: "Code review"
       frames: []
 
     - name: "Done"
       jira_status_name: "Done"
+      frames: []
+
+    - name: "Closed"
+      jira_status_name: "Closed"
       frames: []
 
 # Phase 2 features (not implemented yet)
