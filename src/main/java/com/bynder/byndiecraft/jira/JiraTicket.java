@@ -7,18 +7,24 @@ public class JiraTicket {
     private final String statusId;
     private final String parentKey;
     private final String parentSummary;
+    private final String issueType;
 
     public JiraTicket(String key, String summary, String status, String statusId) {
-        this(key, summary, status, statusId, null, null);
+        this(key, summary, status, statusId, null, null, null);
     }
 
     public JiraTicket(String key, String summary, String status, String statusId, String parentKey, String parentSummary) {
+        this(key, summary, status, statusId, parentKey, parentSummary, null);
+    }
+
+    public JiraTicket(String key, String summary, String status, String statusId, String parentKey, String parentSummary, String issueType) {
         this.key = key;
         this.summary = summary;
         this.status = status;
         this.statusId = statusId;
         this.parentKey = parentKey;
         this.parentSummary = parentSummary;
+        this.issueType = issueType;
     }
 
     public String getKey() {
@@ -43,6 +49,10 @@ public class JiraTicket {
 
     public String getParentSummary() {
         return parentSummary;
+    }
+
+    public String getIssueType() {
+        return issueType;
     }
 
     public boolean hasParent() {

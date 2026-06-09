@@ -205,6 +205,7 @@ public class JiraClient {
                 JsonArray fieldsArray = new JsonArray();
                 fieldsArray.add("summary");
                 fieldsArray.add("status");
+                fieldsArray.add("issuetype");
                 fieldsArray.add("parent");
                 requestJson.add("fields", fieldsArray);
 
@@ -244,6 +245,11 @@ public class JiraClient {
                         String statusName = status.get("name").getAsString();
                         String statusId = status.get("id").getAsString();
 
+                        String issueType = null;
+                        if (fields.has("issuetype") && !fields.get("issuetype").isJsonNull()) {
+                            issueType = fields.getAsJsonObject("issuetype").get("name").getAsString();
+                        }
+
                         String parentKey = null;
                         String parentSummary = null;
                         if (fields.has("parent") && !fields.get("parent").isJsonNull()) {
@@ -255,7 +261,7 @@ public class JiraClient {
                             }
                         }
 
-                        tickets.add(new JiraTicket(key, summary, statusName, statusId, parentKey, parentSummary));
+                        tickets.add(new JiraTicket(key, summary, statusName, statusId, parentKey, parentSummary, issueType));
                     }
 
                     if (debugMode) {

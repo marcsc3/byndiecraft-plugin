@@ -376,10 +376,21 @@ public class BoardSpawner {
 
         meta.setTitle(ticket.getKey() + ": " + ticket.getSummary());
         meta.setAuthor("Jira");
-        meta.displayName(Component.text(ticket.getKey() + ": " + ticket.getSummary()).color(NamedTextColor.GOLD));
-        meta.addPages(Component.text(ticket.getKey() + "\n\n" + ticket.getSummary() + "\n\nStatus: " + ticket.getStatus()));
+        meta.displayName(Component.text(ticket.getKey() + ": " + ticket.getSummary()).color(getColorForType(ticket.getIssueType())));
+        meta.addPages(Component.text(ticket.getKey() + "\n\n" + ticket.getSummary() + "\n\nType: " + ticket.getIssueType() + "\nStatus: " + ticket.getStatus()));
 
         book.setItemMeta(meta);
         return book;
+    }
+
+    private NamedTextColor getColorForType(String issueType) {
+        if (issueType == null) return NamedTextColor.WHITE;
+        return switch (issueType.toLowerCase()) {
+            case "bug" -> NamedTextColor.RED;
+            case "story" -> NamedTextColor.GREEN;
+            case "task", "sub-task", "subtask" -> NamedTextColor.BLUE;
+            case "spike" -> NamedTextColor.GOLD;
+            default -> NamedTextColor.WHITE;
+        };
     }
 }
