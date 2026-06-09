@@ -5,15 +5,16 @@ jira:
   # Your Jira instance URL
   url: "https://bynder.atlassian.net"
 
-  # Your Jira email address
-  email: "your-email@bynder.com"
-
-  # API token (can also be set via JIRA_API_TOKEN environment variable)
-  # Generate at: https://id.atlassian.com/manage-profile/security/api-tokens
-  api_token: "${JIRA_API_TOKEN}"
-
   # Project key for your Jira board
   project_key: "SHARE"
+
+  # Credentials are loaded from credentials.yml (in the plugin data folder)
+  # Create plugins/Byndiecraft/credentials.yml with:
+  #   jira:
+  #     email: "your-email@bynder.com"
+  #     api_token: "your-token-here"
+  #
+  # Alternatively, set JIRA_API_TOKEN environment variable
 
 board:
   # Minecraft world name where the board is located

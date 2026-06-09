@@ -27,7 +27,7 @@ public class ByndiecraftPlugin extends JavaPlugin {
         saveDefaultConfig();
 
         // Load configuration
-        configLoader = new ConfigLoader(getConfig(), getLogger());
+        configLoader = new ConfigLoader(getConfig(), getDataFolder(), getLogger());
 
         // Validate Jira credentials
         String jiraUrl = configLoader.getJiraUrl();

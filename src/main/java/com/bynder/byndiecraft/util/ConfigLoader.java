@@ -7,18 +7,32 @@ import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.configuration.file.YamlConfiguration;
 
+import java.io.File;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
 
 public class ConfigLoader {
     private final FileConfiguration config;
+    private final FileConfiguration credentials;
     private final Logger logger;
 
-    public ConfigLoader(FileConfiguration config, Logger logger) {
+    public ConfigLoader(FileConfiguration config, File dataFolder, Logger logger) {
         this.config = config;
         this.logger = logger;
+        this.credentials = loadCredentials(dataFolder);
+    }
+
+    private FileConfiguration loadCredentials(File dataFolder) {
+        File credFile = new File(dataFolder, "credentials.yml");
+        if (credFile.exists()) {
+            logger.info("Loading credentials from credentials.yml");
+            return YamlConfiguration.loadConfiguration(credFile);
+        }
+        logger.warning("credentials.yml not found in " + dataFolder.getPath());
+        return new YamlConfiguration();
     }
 
     public String getJiraUrl() {
@@ -26,12 +40,21 @@ public class ConfigLoader {
     }
 
     public String getJiraEmail() {
-        return config.getString("jira.email", "");
+        String email = credentials.getString("jira.email", "");
+        if (email.isEmpty()) {
+            email = config.getString("jira.email", "");
+        }
+        return email;
     }
 
     public String getJiraApiToken() {
-        String token = config.getString("jira.api_token", "");
-        // Check if it's an environment variable reference
+        // Priority: credentials.yml > env var > config.yml
+        String token = credentials.getString("jira.api_token", "");
+        if (!token.isEmpty()) {
+            return token;
+        }
+
+        token = config.getString("jira.api_token", "");
         if (token.startsWith("${") && token.endsWith("}")) {
             String envVar = token.substring(2, token.length() - 1);
             String envValue = System.getenv(envVar);
