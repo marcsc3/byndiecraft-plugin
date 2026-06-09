@@ -121,27 +121,7 @@ public class BoardSpawner {
             plugin.getLogger().info("Ticket statuses found: " + ticketsByStatus.keySet());
         }
 
-        // Build columns dynamically: start with configured ones, then add any new statuses
-        List<StatusColumn> columns = new ArrayList<>(boardManager.getBoard().getColumns());
-        Set<String> knownStatuses = columns.stream()
-                .map(c -> c.getJiraStatusName().toLowerCase())
-                .collect(Collectors.toSet());
-
-        for (String status : ticketsByStatus.keySet()) {
-            if (!knownStatuses.contains(status)) {
-                String displayName = tickets.stream()
-                        .filter(t -> t.getStatus().toLowerCase().equals(status))
-                        .map(JiraTicket::getStatus)
-                        .findFirst()
-                        .orElse(status);
-                columns.add(new StatusColumn(displayName, displayName));
-                if (plugin.getConfigLoader().isDebugMode()) {
-                    plugin.getLogger().info("Auto-created column for status: " + displayName);
-                }
-            }
-        }
-
-        boardManager.getBoard().setColumns(columns);
+        List<StatusColumn> columns = boardManager.getBoard().getColumns();
 
         // Find tallest column to size the backing wall
         int maxHeight = ticketsByStatus.values().stream()
