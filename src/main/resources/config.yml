@@ -43,7 +43,7 @@ board:
       frames: []
 
     - name: "Merge"
-      jira_status_name: "Verified"
+      jira_status_name: "Merge"
       frames: []
 
     - name: "Done"
