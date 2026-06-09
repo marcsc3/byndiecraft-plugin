@@ -196,14 +196,27 @@ public class JiraClient {
     public CompletableFuture<List<JiraTicket>> searchIssues(String projectKey) {
         return CompletableFuture.supplyAsync(() -> {
             try {
-                String jql = "project = " + projectKey + " ORDER BY status ASC";
-                String url = baseUrl + "/rest/api/3/search?jql=" + java.net.URLEncoder.encode(jql, java.nio.charset.StandardCharsets.UTF_8) + "&maxResults=50&fields=summary,status";
+                String jql = "project = \"" + projectKey + "\" ORDER BY status ASC";
+                String url = baseUrl + "/rest/api/3/search/jql";
+
+                JsonObject requestJson = new JsonObject();
+                requestJson.addProperty("jql", jql);
+                requestJson.addProperty("maxResults", 50);
+                JsonArray fieldsArray = new JsonArray();
+                fieldsArray.add("summary");
+                fieldsArray.add("status");
+                requestJson.add("fields", fieldsArray);
+
+                RequestBody body = RequestBody.create(
+                        requestJson.toString(),
+                        MediaType.parse("application/json")
+                );
 
                 Request request = new Request.Builder()
                         .url(url)
                         .header("Authorization", authHeader)
                         .header("Accept", "application/json")
-                        .get()
+                        .post(body)
                         .build();
 
                 if (debugMode) {
