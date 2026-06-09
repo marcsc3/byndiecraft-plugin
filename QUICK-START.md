@@ -47,13 +47,13 @@ board:
 Restart: `/reload confirm`
 
 ### 5. Test It!
-1. Create written book with title: `TAP-123`
+1. Create written book with title: `SHARE-123`
 2. Place in item frame
-3. See: `✓ TAP-123 moved to 'To Do'`
+3. See: `✓ SHARE-123 moved to 'To Do'`
 4. Check Jira - ticket updated! 🎉
 
 ## 📝 Book Format
-- Title: `TAP-123` or `TAP-123: Summary`
+- Title: `SHARE-123` or `SHARE-123: Summary`
 - Must be **Written Book** (signed)
 - Ticket key format: `PROJECT-NUMBER`
 

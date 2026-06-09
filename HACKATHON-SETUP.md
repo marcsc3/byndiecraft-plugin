@@ -164,11 +164,11 @@ java -Xmx2G -Xms2G -jar paper.jar --nogui
 
 ## Step 7: Test with Real Jira Tickets (3 min)
 
-### Find Real TAP Tickets
+### Find Real SHARE Tickets
 
-1. Go to: https://bynder.atlassian.net/projects/TAP
+1. Go to: https://bynder.atlassian.net/projects/SHARE
 2. Find 3-5 tickets you can use for demo
-3. Note their ticket keys (e.g., `TAP-123`, `TAP-456`)
+3. Note their ticket keys (e.g., `SHARE-123`, `SHARE-456`)
 
 **Important:** Make sure these tickets:
 - ✅ Actually exist
@@ -184,7 +184,7 @@ java -Xmx2G -Xms2G -jar paper.jar --nogui
 Or craft: Book + Feather + Ink Sac
 
 **For each book:**
-1. Write the ticket key as title: `TAP-123`
+1. Write the ticket key as title: `SHARE-123`
 2. Click "Sign and Close"
 3. You now have a "Written Book"
 
@@ -193,8 +193,8 @@ Or craft: Book + Feather + Ink Sac
 1. **Place book in frame** in "To Do" column
 2. **Watch chat** - you should see:
    ```
-   ⏳ Updating TAP-123 to 'To Do'...
-   ✓ TAP-123 moved to 'To Do'
+   ⏳ Updating SHARE-123 to 'To Do'...
+   ✓ SHARE-123 moved to 'To Do'
    ```
 3. **Check Jira** in browser - ticket should be updated!
 4. **Move book** to "In Progress" frame
@@ -213,15 +213,15 @@ source ~/Documents/Bynder/Github/byndiecraft-plugin/setup-env.sh
 
 ### "Failed to update ticket"
 Check console logs for details:
-- Is the ticket key valid? (e.g., `TAP-123`)
+- Is the ticket key valid? (e.g., `SHARE-123`)
 - Does the ticket exist in Jira?
 - Do you have permission to edit it?
 - Can the ticket be transitioned to that status?
 
 ### "No valid Jira ticket key found"
 Book title must contain the pattern: `PROJECT-123`
-- ✅ `TAP-123`
-- ✅ `TAP-123: Summary`
+- ✅ `SHARE-123`
+- ✅ `SHARE-123: Summary`
 - ❌ `tap-123` (lowercase)
 - ❌ `Just a book` (no ticket key)
 

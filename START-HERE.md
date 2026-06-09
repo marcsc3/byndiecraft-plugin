@@ -26,7 +26,7 @@ Your Minecraft Jira integration plugin is **built and ready**! Follow these step
 
 ### ✅ Phase 3: Test (10 min)
 
-- [ ] **Find 3-5 real TAP tickets** from Jira
+- [ ] **Find 3-5 real SHARE tickets** from Jira
 - [ ] **Create written books** with ticket keys
 - [ ] **Place book in frame** → Check for success message
 - [ ] **Check Jira** → Verify ticket updated
@@ -75,7 +75,7 @@ Before presenting:
 ## 🔑 Your Credentials
 
 **Jira URL:** https://bynder.atlassian.net  
-**Project:** TAP  
+**Project:** SHARE  
 **API Token:** ✅ Configured in `setup-env.sh` (gitignored)
 
 **Your email:** Update in `plugins/Byndiecraft/config.yml`
@@ -86,7 +86,7 @@ Before presenting:
 |---------|----------|
 | "API token not configured" | Run `source setup-env.sh` before starting server |
 | "Failed to update ticket" | Check ticket exists and you have permission |
-| "No valid ticket key" | Book title must be like `TAP-123` |
+| "No valid ticket key" | Book title must be like `SHARE-123` |
 | Server won't start | Check Java version (`java -version`) - need 21+ |
 
 **Enable debug logs:** Set `debug: true` in config.yml

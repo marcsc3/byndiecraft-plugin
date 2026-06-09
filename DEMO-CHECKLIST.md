@@ -23,7 +23,7 @@
 
 ### ✅ Jira Preparation
 - [ ] Open browser to Jira board view
-- [ ] Find 3-5 **real** tickets in TAP project (not fake ones!)
+- [ ] Find 3-5 **real** tickets in SHARE project (not fake ones!)
 - [ ] Note their current statuses
 - [ ] Verify you can manually transition them (test permissions)
 - [ ] Recommended tickets:
@@ -34,12 +34,12 @@
 ### ✅ Minecraft Books Preparation
 - [ ] Create written books for each demo ticket:
   ```
-  Book 1 title: "TAP-123: Login Bug"
-  Book 2 title: "TAP-456: Add feature"
-  Book 3 title: "TAP-789: Fix crash"
+  Book 1 title: "SHARE-123: Login Bug"
+  Book 2 title: "SHARE-456: Add feature"
+  Book 3 title: "SHARE-789: Fix crash"
   ```
 - [ ] Keep books in your hotbar for quick access
-- [ ] Have one book with **invalid** ticket (e.g., `TAP-9999`) for error demo
+- [ ] Have one book with **invalid** ticket (e.g., `SHARE-9999`) for error demo
 
 ### ✅ Screen Sharing Setup
 - [ ] **Split screen**: Minecraft left, Jira browser right
@@ -94,7 +94,7 @@ Each book in a frame represents a real Jira ticket."
 ```
 "Let me show you how it works.
 
-[Player 1]: 'I'm starting work on TAP-123'
+[Player 1]: 'I'm starting work on SHARE-123'
 ```
 
 **Action:**
@@ -103,13 +103,13 @@ Each book in a frame represents a real Jira ticket."
 3. Wait 1 second
 4. ✅ Success message appears in chat
 5. **Presenter** switches to Jira browser tab
-6. Point out: "See? TAP-123 is now in 'In Progress' in Jira!"
+6. Point out: "See? SHARE-123 is now in 'In Progress' in Jira!"
 
 ### 4️⃣ Live Demo #2 (60 seconds)
 ```
 "Let's do another one.
 
-[Player 2]: 'I finished TAP-456!'
+[Player 2]: 'I finished SHARE-456!'
 ```
 
 **Action:**
@@ -118,7 +118,7 @@ Each book in a frame represents a real Jira ticket."
 3. ✅ Success message appears
 4. **Presenter** switches back to Jira
 5. Refresh page (or just watch it update)
-6. Point out: "TAP-456 moved to Done!"
+6. Point out: "SHARE-456 moved to Done!"
 
 ### 5️⃣ Error Handling (30 seconds)
 ```
@@ -127,8 +127,8 @@ Watch what happens if I try a fake ticket..."
 ```
 
 **Action:**
-1. Place book with invalid ticket (`TAP-9999`)
-2. ❌ Error message appears: "Failed to update TAP-9999"
+1. Place book with invalid ticket (`SHARE-9999`)
+2. ❌ Error message appears: "Failed to update SHARE-9999"
 3. Say: "The plugin validates tickets exist and shows clear errors."
 
 ### 6️⃣ Technical Highlights (60 seconds)
