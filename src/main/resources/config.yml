@@ -1,0 +1,44 @@
+# Byndiecraft Configuration
+# For hackathon setup guide, see README.md
+
+jira:
+  # Your Jira instance URL
+  url: "https://bynder.atlassian.net"
+
+  # Your Jira email address
+  email: "your-email@bynder.com"
+
+  # API token (can also be set via JIRA_API_TOKEN environment variable)
+  # Generate at: https://id.atlassian.com/manage-profile/security/api-tokens
+  api_token: "${JIRA_API_TOKEN}"
+
+  # Project key for your Jira board
+  project_key: "TAP"
+
+board:
+  # Minecraft world name where the board is located
+  world: "world"
+
+  # Status columns configuration
+  # Each column represents a Jira status and contains item frame locations
+  columns:
+    - name: "To Do"
+      jira_status_name: "To Do"
+      # These coordinates will be set by /jiraboard setup command
+      frames: []
+
+    - name: "In Progress"
+      jira_status_name: "In Progress"
+      frames: []
+
+    - name: "Done"
+      jira_status_name: "Done"
+      frames: []
+
+# Phase 2 features (not implemented yet)
+sync:
+  enabled: false
+  interval_seconds: 60
+
+# Debug mode - set to true for verbose logging
+debug: true

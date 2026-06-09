@@ -1,0 +1,40 @@
+# Gradle
+.gradle/
+build/
+out/
+bin/
+
+# IntelliJ IDEA
+.idea/
+*.iml
+*.ipr
+*.iws
+
+# Eclipse
+.classpath
+.project
+.settings/
+
+# VS Code
+.vscode/
+
+# macOS
+.DS_Store
+
+# Minecraft server files (for testing)
+server/
+plugins/
+logs/
+world/
+world_nether/
+world_the_end/
+*.jar
+!gradle/wrapper/gradle-wrapper.jar
+
+# Config with secrets
+src/main/resources/config-local.yml
+config-local.yml
+setup-env.sh
+
+# Logs
+*.log

@@ -1,0 +1,135 @@
+# Byndiecraft Configuration Example
+# Copy this to your server: plugins/Byndiecraft/config.yml
+
+jira:
+  # Your Bynder Jira URL
+  url: "https://bynder.atlassian.net"
+
+  # Your Bynder email address
+  email: "john.doe@bynder.com"
+
+  # Jira API Token
+  # Generate at: https://id.atlassian.com/manage-profile/security/api-tokens
+  # Best practice: Use environment variable
+  api_token: "${JIRA_API_TOKEN}"
+  # Or set directly (less secure):
+  # api_token: "ATATT3xFfGF0..."
+
+  # Jira project key (default: TAP)
+  project_key: "TAP"
+
+board:
+  # Minecraft world name
+  world: "world"
+
+  # Status columns - each represents a Jira workflow status
+  # IMPORTANT: jira_status_name must EXACTLY match Jira status names
+  columns:
+    # ============================================
+    # Column 1: To Do
+    # ============================================
+    - name: "To Do"
+      jira_status_name: "To Do"
+      frames:
+        # Example coordinates - replace with your frame locations
+        - { x: 100, y: 64, z: 200 }
+        - { x: 100, y: 65, z: 200 }
+        - { x: 100, y: 66, z: 200 }
+        - { x: 100, y: 67, z: 200 }
+
+    # ============================================
+    # Column 2: In Progress
+    # ============================================
+    - name: "In Progress"
+      jira_status_name: "In Progress"
+      frames:
+        - { x: 105, y: 64, z: 200 }
+        - { x: 105, y: 65, z: 200 }
+        - { x: 105, y: 66, z: 200 }
+        - { x: 105, y: 67, z: 200 }
+
+    # ============================================
+    # Column 3: In Review
+    # ============================================
+    - name: "In Review"
+      jira_status_name: "In Review"
+      frames:
+        - { x: 110, y: 64, z: 200 }
+        - { x: 110, y: 65, z: 200 }
+        - { x: 110, y: 66, z: 200 }
+        - { x: 110, y: 67, z: 200 }
+
+    # ============================================
+    # Column 4: Done
+    # ============================================
+    - name: "Done"
+      jira_status_name: "Done"
+      frames:
+        - { x: 115, y: 64, z: 200 }
+        - { x: 115, y: 65, z: 200 }
+        - { x: 115, y: 66, z: 200 }
+        - { x: 115, y: 67, z: 200 }
+
+# ============================================
+# Advanced Settings
+# ============================================
+
+# Phase 2 feature: Bi-directional sync (not yet implemented)
+sync:
+  enabled: false
+  interval_seconds: 60
+
+# Debug mode - shows detailed API calls in console
+debug: true
+
+# ============================================
+# Getting Frame Coordinates
+# ============================================
+# 1. Place item frames in Minecraft
+# 2. Stand next to a frame
+# 3. Run: /execute at @p run tp ~ ~ ~
+# 4. Note the X, Y, Z coordinates shown
+# 5. Add them to the frames list above
+
+# ============================================
+# Common Jira Status Names
+# ============================================
+# Your Jira workflow might use different status names.
+# Check your project's workflow to find exact status names.
+#
+# Common status names:
+# - "To Do"
+# - "In Progress"
+# - "In Review"
+# - "Done"
+# - "Backlog"
+# - "Selected for Development"
+# - "Code Review"
+# - "QA Testing"
+# - "Blocked"
+# - "Closed"
+#
+# To find your status names:
+# 1. Go to Jira project settings
+# 2. Navigate to "Workflows"
+# 3. View the workflow diagram
+# 4. Note the exact status names (case-sensitive!)
+
+# ============================================
+# Troubleshooting
+# ============================================
+#
+# "Failed to transition ticket"
+# → Check that the target status exists in your workflow
+# → Verify you have permission to transition tickets
+# → Enable debug mode to see available transitions
+#
+# "No frames configured"
+# → Add frame coordinates to the columns above
+# → Make sure world name matches your server's world
+#
+# "API authentication failed"
+# → Verify your email and API token are correct
+# → Check that JIRA_API_TOKEN environment variable is set
+#
+# More help: See SETUP-GUIDE.md

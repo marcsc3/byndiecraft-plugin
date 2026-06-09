@@ -1,0 +1,230 @@
+╔════════════════════════════════════════════════════════════════════╗
+║                    BYNDIECRAFT DEMO GUIDE                          ║
+║           Minecraft Jira Board - Visual Reference                  ║
+╚════════════════════════════════════════════════════════════════════╝
+
+┌────────────────────────────────────────────────────────────────────┐
+│                    MINECRAFT BOARD LAYOUT                          │
+└────────────────────────────────────────────────────────────────────┘
+
+          ╔═══════════════════════════════════════════╗
+          ║     BYNDIECRAFT JIRA BOARD                ║
+          ╠════════════╦════════════╦═════════════════╣
+          ║  TO DO     ║ IN PROGRESS║     DONE        ║
+          ╠════════════╬════════════╬═════════════════╣
+          ║ ┌───────┐  ║ ┌───────┐  ║  ┌───────┐      ║
+          ║ │TAP-123│  ║ │TAP-456│  ║  │TAP-789│      ║
+          ║ └───────┘  ║ └───────┘  ║  └───────┘      ║
+          ║            ║            ║                 ║
+          ║ ┌───────┐  ║ ┌───────┐  ║  ┌───────┐      ║
+          ║ │  [ ]  │  ║ │  [ ]  │  ║  │  [ ]  │      ║
+          ║ └───────┘  ║ └───────┘  ║  └───────┘      ║
+          ╚════════════╩════════════╩═════════════════╝
+
+┌────────────────────────────────────────────────────────────────────┐
+│                         DEMO FLOW                                  │
+└────────────────────────────────────────────────────────────────────┘
+
+Step 1: Player picks up book from "TO DO"
+   ┌─────────┐
+   │ TAP-123 │  ──→  👤 Player's Hand
+   └─────────┘
+
+Step 2: Player places book in "IN PROGRESS"
+   👤 Player's Hand  ──→  ┌─────────┐
+                          │ TAP-123 │
+                          └─────────┘
+
+Step 3: Plugin detects and updates
+   ┌──────────────────────────────────────────┐
+   │ ⏳ Updating TAP-123 to 'In Progress'... │
+   │ ✓ TAP-123 moved to 'In Progress'        │
+   └──────────────────────────────────────────┘
+
+Step 4: Jira updates instantly!
+   BEFORE                    AFTER
+   ┌──────────┐             ┌──────────┐
+   │ TAP-123  │             │ TAP-123  │
+   │ Status:  │             │ Status:  │
+   │ To Do    │    ═══>     │ In Prog. │
+   └──────────┘             └──────────┘
+
+┌────────────────────────────────────────────────────────────────────┐
+│                    SCREEN SHARE LAYOUT                             │
+└────────────────────────────────────────────────────────────────────┘
+
+  ┌─────────────────────────┬────────────────────────────┐
+  │                         │                            │
+  │    MINECRAFT WINDOW     │      JIRA BROWSER         │
+  │                         │                            │
+  │  ┌───────────────────┐  │  ┌──────────────────────┐ │
+  │  │   Jira Board      │  │  │  TAP Board           │ │
+  │  │   [Frames here]   │  │  │  ┌────────────────┐  │ │
+  │  │                   │  │  │  │ TAP-123        │  │ │
+  │  │  Player moves     │  │  │  │ Status: ...    │  │ │
+  │  │  book here ──→    │  │  │  │ ← Updates!     │  │ │
+  │  │                   │  │  │  └────────────────┘  │ │
+  │  └───────────────────┘  │  └──────────────────────┘ │
+  │                         │                            │
+  └─────────────────────────┴────────────────────────────┘
+
+┌────────────────────────────────────────────────────────────────────┐
+│                     BOOK FORMAT EXAMPLES                           │
+└────────────────────────────────────────────────────────────────────┘
+
+  ✅ VALID FORMATS:
+
+    ┌─────────────────────┐
+    │  TAP-123            │  ← Simple (just key)
+    └─────────────────────┘
+
+    ┌─────────────────────┐
+    │  TAP-123: Fix bug   │  ← With summary
+    └─────────────────────┘
+
+    ┌─────────────────────┐
+    │  Working on TAP-456 │  ← Key in sentence
+    └─────────────────────┘
+
+  ❌ INVALID FORMATS:
+
+    ┌─────────────────────┐
+    │  tap-123            │  ← Lowercase
+    └─────────────────────┘
+
+    ┌─────────────────────┐
+    │  TAP123             │  ← Missing dash
+    └─────────────────────┘
+
+    ┌─────────────────────┐
+    │  Just a note        │  ← No ticket key
+    └─────────────────────┘
+
+┌────────────────────────────────────────────────────────────────────┐
+│                    JIRA STATUS MAPPING                             │
+└────────────────────────────────────────────────────────────────────┘
+
+  Minecraft Column          Jira Status
+  ┌──────────────┐         ┌──────────────┐
+  │   TO DO      │  ═══>   │   To Do      │
+  └──────────────┘         └──────────────┘
+
+  ┌──────────────┐         ┌──────────────┐
+  │ IN PROGRESS  │  ═══>   │ In Progress  │
+  └──────────────┘         └──────────────┘
+
+  ┌──────────────┐         ┌──────────────┐
+  │    DONE      │  ═══>   │    Done      │
+  └──────────────┘         └──────────────┘
+
+  ⚠️  Names must match EXACTLY (case-sensitive!)
+
+┌────────────────────────────────────────────────────────────────────┐
+│                  TECHNICAL ARCHITECTURE                            │
+└────────────────────────────────────────────────────────────────────┘
+
+  Player Action
+      │
+      ▼
+  ┌─────────────────────┐
+  │ ItemFrameListener   │ ← Detects book placement
+  └──────────┬──────────┘
+             │
+             ▼
+  ┌─────────────────────┐
+  │   BookParser        │ ← Extracts "TAP-123"
+  └──────────┬──────────┘
+             │
+             ▼
+  ┌─────────────────────┐
+  │   BoardManager      │ ← Maps frame → status
+  └──────────┬──────────┘
+             │
+             ▼
+  ┌─────────────────────┐
+  │    JiraClient       │ ← Calls Jira API
+  │  (Async HTTP)       │
+  └──────────┬──────────┘
+             │
+             ▼
+  ┌─────────────────────────────────┐
+  │  Jira REST API                  │
+  │  POST /issue/TAP-123/transitions│
+  └─────────────────────────────────┘
+
+┌────────────────────────────────────────────────────────────────────┐
+│                      ERROR MESSAGES                                │
+└────────────────────────────────────────────────────────────────────┘
+
+  ✓ SUCCESS:
+    ┌────────────────────────────────────────┐
+    │ ✓ TAP-123 moved to 'In Progress'      │
+    │ [*ding* sound effect]                  │
+    └────────────────────────────────────────┘
+
+  ✗ FAILURE:
+    ┌────────────────────────────────────────┐
+    │ ✗ Failed to update TAP-123 in Jira    │
+    │ Check if the ticket exists and you     │
+    │ have permission to transition it.      │
+    │ [*error* sound effect]                 │
+    └────────────────────────────────────────┘
+
+  ⚠️  WARNING:
+    ┌────────────────────────────────────────┐
+    │ ⚠ No valid Jira ticket key found in   │
+    │ book title: "Just a note"              │
+    └────────────────────────────────────────┘
+
+┌────────────────────────────────────────────────────────────────────┐
+│                       DEMO TALKING POINTS                          │
+└────────────────────────────────────────────────────────────────────┘
+
+  1. "Stand-ups can be boring, so we made them fun!"
+     → Show Minecraft board
+
+  2. "Each book represents a real Jira ticket"
+     → Show book with TAP-123
+
+  3. "When you move a book, Jira updates instantly"
+     → Do live demo
+
+  4. "It's async, so no lag - multiple players work fine"
+     → Show technical architecture
+
+  5. "Built in 6 hours with AI assistance"
+     → Show code/stats
+
+  6. "Extensible: could add webhooks, analytics, more!"
+     → Mention Phase 2 features
+
+┌────────────────────────────────────────────────────────────────────┐
+│                      SUCCESS CHECKLIST                             │
+└────────────────────────────────────────────────────────────────────┘
+
+  Before Demo:
+  ☐ Server running (no errors in console)
+  ☐ Board built and looks good
+  ☐ 3-5 real tickets ready (TAP-xxx)
+  ☐ Books created with ticket keys
+  ☐ Jira browser tab open
+  ☐ Screen share configured (split view)
+  ☐ Team knows roles (who moves what)
+  ☐ Backup screenshots/video ready
+  ☐ Practiced at least once!
+
+  During Demo:
+  ☐ Speak clearly and enthusiastically
+  ☐ Show the sync happening live
+  ☐ Point out the instant update in Jira
+  ☐ Smile - you built something awesome!
+
+  After Demo:
+  ☐ Answer questions confidently
+  ☐ Mention extensibility
+  ☐ Share GitHub if asked
+  ☐ Thank judges!
+
+╔════════════════════════════════════════════════════════════════════╗
+║                 YOU'VE GOT THIS! GOOD LUCK! 🚀                     ║
+╚════════════════════════════════════════════════════════════════════╝

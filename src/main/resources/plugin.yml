@@ -1,0 +1,25 @@
+name: ${name}
+version: ${version}
+main: ${main}
+api-version: '1.21'
+author: Byndiecraft Team
+description: Minecraft Jira Board Integration - Move tickets in Minecraft, update them in Jira!
+
+commands:
+  jiraboard:
+    description: Manage the Jira board in Minecraft
+    usage: |
+      /jiraboard setup - Set up a new board
+      /jiraboard addcolumn <statusName> <jiraStatusId> - Add a status column
+      /jiraboard info - Show board configuration
+      /jiraboard refresh - Manually sync with Jira (Phase 2)
+    permission: byndiecraft.admin
+    aliases: [jb]
+
+permissions:
+  byndiecraft.admin:
+    description: Allows managing the Jira board
+    default: op
+  byndiecraft.use:
+    description: Allows interacting with the Jira board
+    default: true

@@ -1,0 +1,44 @@
+# Byndiecraft Configuration - READY TO USE
+# Copy this to your Minecraft server: plugins/Byndiecraft/config.yml
+
+jira:
+  url: "https://bynder.atlassian.net"
+
+  # TODO: Add your Bynder email here
+  email: "your.email@bynder.com"  # ← CHANGE THIS!
+
+  # API token will be loaded from environment variable
+  api_token: "${JIRA_API_TOKEN}"
+
+  project_key: "TAP"
+
+board:
+  world: "world"
+
+  # TODO: Configure your frame coordinates after building the board
+  # To get coordinates: stand next to a frame and run:
+  #   /execute at @p run tp ~ ~ ~
+  columns:
+    - name: "To Do"
+      jira_status_name: "To Do"
+      frames:
+        # Example: Add your frame coordinates here
+        # - { x: 100, y: 64, z: 200 }
+        # - { x: 100, y: 65, z: 200 }
+
+    - name: "In Progress"
+      jira_status_name: "In Progress"
+      frames:
+        # - { x: 105, y: 64, z: 200 }
+
+    - name: "Done"
+      jira_status_name: "Done"
+      frames:
+        # - { x: 110, y: 64, z: 200 }
+
+sync:
+  enabled: false
+  interval_seconds: 60
+
+# Enable debug mode for hackathon (helpful for troubleshooting)
+debug: true

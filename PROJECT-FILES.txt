@@ -1,0 +1,103 @@
+# Byndiecraft - Complete File Listing
+
+## 📦 Deliverables
+
+**Plugin JAR (Ready to Deploy):**
+build/libs/byndiecraft-plugin-1.0.0-SNAPSHOT.jar (3.4 MB)
+
+## 📚 Documentation Files
+
+README.md                   - Full project documentation
+SETUP-GUIDE.md             - Step-by-step setup instructions  
+QUICK-START.md             - 5-minute quick start guide
+PROJECT-SUMMARY.md         - Technical overview and statistics
+DEMO-CHECKLIST.md          - Complete demo preparation guide
+config-example.yml         - Annotated configuration example
+
+## ⚙️ Configuration Files
+
+build.gradle               - Gradle build configuration
+settings.gradle            - Gradle settings
+.gitignore                - Git ignore rules
+
+## 📝 Plugin Resources
+
+src/main/resources/plugin.yml    - Plugin metadata
+src/main/resources/config.yml    - Default configuration template
+
+## 💻 Source Code (11 Java files, ~1,040 lines)
+
+### Main Plugin
+src/main/java/com/bynder/byndiecraft/ByndiecraftPlugin.java
+  - Plugin entry point and lifecycle management
+  - Initializes Jira client, board manager, event listeners
+  - Registers commands
+
+### Jira Integration (3 files)
+src/main/java/com/bynder/byndiecraft/jira/JiraClient.java
+  - HTTP client for Jira REST API
+  - Methods: getIssue(), getTransitions(), transitionIssue()
+  - Async execution with CompletableFuture
+
+src/main/java/com/bynder/byndiecraft/jira/JiraTicket.java
+  - Data model for Jira tickets
+  - Fields: key, summary, status, statusId
+
+src/main/java/com/bynder/byndiecraft/jira/TransitionRequest.java
+  - API request model for status transitions
+  - JSON serialization structure
+
+### Board Management (3 files)
+src/main/java/com/bynder/byndiecraft/board/BoardManager.java
+  - Manages board state and coordinates
+  - Maps frames to status columns
+  - Caches ticket statuses
+
+src/main/java/com/bynder/byndiecraft/board/JiraBoard.java
+  - Board configuration model
+  - Contains list of StatusColumns
+  - Methods for querying columns by name/location
+
+src/main/java/com/bynder/byndiecraft/board/StatusColumn.java
+  - Represents a status column (e.g., "In Progress")
+  - Contains frame locations
+  - Maps to Jira status name
+
+### Event Handling (1 file)
+src/main/java/com/bynder/byndiecraft/listeners/ItemFrameListener.java
+  - Listens for PlayerInteractEntityEvent
+  - Detects books placed in tracked frames
+  - Triggers Jira API calls
+  - Provides player feedback
+
+### Commands (1 file)
+src/main/java/com/bynder/byndiecraft/commands/JiraBoardCommand.java
+  - Handles /jiraboard commands
+  - Subcommands: info, setup, addcolumn, refresh
+  - Tab completion support
+
+### Utilities (2 files)
+src/main/java/com/bynder/byndiecraft/util/BookParser.java
+  - Extracts Jira ticket keys from book titles
+  - Regex pattern matching
+  - Validation
+
+src/main/java/com/bynder/byndiecraft/util/ConfigLoader.java
+  - Loads configuration from config.yml
+  - Environment variable expansion
+  - Parses board structure
+
+## 🏗️ Build Artifacts
+
+gradle/wrapper/gradle-wrapper.jar
+gradle/wrapper/gradle-wrapper.properties
+gradlew
+gradlew.bat
+
+## 📊 Statistics
+
+Total Java Files: 11
+Total Lines of Code: ~1,040
+Total Documentation: ~800 lines
+Build Output Size: 3.4 MB
+Build Time: ~6 seconds
