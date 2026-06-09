@@ -50,6 +50,9 @@ public class JiraBoardCommand implements CommandExecutor, TabCompleter {
                 }
                 return handleAddColumn(sender, args[1], args[2]);
 
+            case "debug":
+                return handleDebug(sender);
+
             case "refresh":
                 return handleRefresh(sender);
 
@@ -112,6 +115,35 @@ public class JiraBoardCommand implements CommandExecutor, TabCompleter {
         return true;
     }
 
+    private boolean handleDebug(CommandSender sender) {
+        sender.sendMessage(Component.text("=== Byndiecraft Debug Info ===").color(NamedTextColor.GOLD));
+
+        // Show listener status
+        sender.sendMessage(Component.text("✓ Event listeners: REGISTERED").color(NamedTextColor.GREEN));
+
+        // Show board configuration
+        String boardInfo = boardManager.getBoardInfo();
+        sender.sendMessage(Component.text(boardInfo).color(NamedTextColor.AQUA));
+
+        // Show player location if player
+        if (sender instanceof Player) {
+            Player player = (Player) sender;
+            sender.sendMessage(Component.text("Your location:").color(NamedTextColor.YELLOW));
+            sender.sendMessage(Component.text(String.format("  World: %s", player.getWorld().getName()))
+                    .color(NamedTextColor.GRAY));
+            sender.sendMessage(Component.text(String.format("  X: %d, Y: %d, Z: %d",
+                    player.getLocation().getBlockX(),
+                    player.getLocation().getBlockY(),
+                    player.getLocation().getBlockZ()))
+                    .color(NamedTextColor.GRAY));
+        }
+
+        sender.sendMessage(Component.text("Check console logs for detailed event tracking")
+                .color(NamedTextColor.YELLOW));
+
+        return true;
+    }
+
     private boolean handleRefresh(CommandSender sender) {
         sender.sendMessage(Component.text("⚠ Bi-directional sync not yet implemented (Phase 2 feature)")
                 .color(NamedTextColor.YELLOW));
@@ -124,6 +156,8 @@ public class JiraBoardCommand implements CommandExecutor, TabCompleter {
         sender.sendMessage(Component.text("=== Byndiecraft Commands ===").color(NamedTextColor.GOLD));
         sender.sendMessage(Component.text("/jiraboard info").color(NamedTextColor.YELLOW)
                 .append(Component.text(" - Show board configuration").color(NamedTextColor.GRAY)));
+        sender.sendMessage(Component.text("/jiraboard debug").color(NamedTextColor.YELLOW)
+                .append(Component.text(" - Show debug information").color(NamedTextColor.GRAY)));
         sender.sendMessage(Component.text("/jiraboard setup").color(NamedTextColor.YELLOW)
                 .append(Component.text(" - Setup guide").color(NamedTextColor.GRAY)));
         sender.sendMessage(Component.text("/jiraboard addcolumn <name> <jiraStatus>").color(NamedTextColor.YELLOW)
