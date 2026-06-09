@@ -50,6 +50,16 @@ board:
       jira_status_name: "Closed"
       frames: []
 
+# Fireworks when a ticket moves to "Done" column
+fireworks:
+  enabled: true
+  power: 1
+  type: BALL_LARGE
+  colors: ["#FF0000", "#FFD700", "#00FF00"]
+  fade_colors: ["#FFFFFF"]
+  trail: true
+  flicker: true
+
 # Phase 2 features (not implemented yet)
 sync:
   enabled: false

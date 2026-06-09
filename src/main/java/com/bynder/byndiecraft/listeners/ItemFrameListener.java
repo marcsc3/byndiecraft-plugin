@@ -5,10 +5,15 @@ import com.bynder.byndiecraft.board.BoardManager;
 import com.bynder.byndiecraft.board.StatusColumn;
 import com.bynder.byndiecraft.jira.JiraClient;
 import com.bynder.byndiecraft.util.BookParser;
+import com.bynder.byndiecraft.util.ConfigLoader;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Bukkit;
+import org.bukkit.FireworkEffect;
+import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.entity.EntityType;
+import org.bukkit.entity.Firework;
 import org.bukkit.entity.ItemFrame;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -17,6 +22,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.BookMeta;
+import org.bukkit.inventory.meta.FireworkMeta;
 
 import java.util.Optional;
 
@@ -170,6 +176,11 @@ public class ItemFrameListener implements Listener {
                             .color(NamedTextColor.GREEN));
                     boardManager.cacheTicketStatus(ticketKey, targetStatus);
 
+                    // Launch fireworks when ticket moves to Done/Closed
+                    if (isDoneStatus(targetStatus)) {
+                        launchFirework(frame.getLocation());
+                    }
+
                     // Optional: Play success sound
                     player.playSound(player.getLocation(), org.bukkit.Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1.0f, 1.0f);
                 } else {
@@ -191,6 +202,22 @@ public class ItemFrameListener implements Listener {
             });
             return null;
         });
+    }
+
+    private boolean isDoneStatus(String status) {
+        String lower = status.toLowerCase();
+        return lower.equals("done") || lower.equals("closed");
+    }
+
+    private void launchFirework(Location location) {
+        ConfigLoader configLoader = plugin.getConfigLoader();
+        if (!configLoader.isFireworksEnabled()) return;
+
+        Firework firework = (Firework) location.getWorld().spawnEntity(location, EntityType.FIREWORK_ROCKET);
+        FireworkMeta meta = firework.getFireworkMeta();
+        meta.addEffect(configLoader.getFireworkEffect());
+        meta.setPower(configLoader.getFireworksPower());
+        firework.setFireworkMeta(meta);
     }
 
     private String formatLocation(ItemFrame frame) {
