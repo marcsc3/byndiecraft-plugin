@@ -197,8 +197,16 @@ fill ~50 ~7 ~15 ~54 ~7 ~21 polished_deepslate
 fill ~50 ~8 ~15 ~54 ~8 ~21 deepslate_brick_slab
 setblock ~52 ~7 ~18 soul_lantern
 
-# South gate (calls separate gate function)
-function byndiecraft:gate
+# South gate opening (main road entrance, 5 wide x 4 high)
+fill ~-2 ~0 ~112 ~2 ~3 ~112 air
+setblock ~-2 ~4 ~112 deepslate_brick_stairs[facing=east,half=bottom]
+setblock ~2 ~4 ~112 deepslate_brick_stairs[facing=west,half=bottom]
+fill ~-3 ~0 ~113 ~-3 ~5 ~113 stone_bricks
+fill ~3 ~0 ~113 ~3 ~5 ~113 stone_bricks
+setblock ~-3 ~4 ~111 soul_lantern
+setblock ~3 ~4 ~111 soul_lantern
+setblock ~-3 ~5 ~111 red_wall_banner[facing=north]
+setblock ~3 ~5 ~111 red_wall_banner[facing=north]
 
 # ============================================
 # WALL-TOP WALKWAY
