@@ -112,20 +112,20 @@ setblock ~7 ~16 ~109 spruce_fence
 setblock ~8 ~16 ~109 spruce_fence
 
 # Passage lighting (chains + lanterns)
-setblock ~-4 ~8 ~110 chain[axis=y]
-setblock ~-4 ~7 ~110 chain[axis=y]
+setblock ~-4 ~8 ~110 minecraft:chain[axis=y]
+setblock ~-4 ~7 ~110 minecraft:chain[axis=y]
 setblock ~-4 ~6 ~110 soul_lantern
-setblock ~4 ~8 ~110 chain[axis=y]
-setblock ~4 ~7 ~110 chain[axis=y]
+setblock ~4 ~8 ~110 minecraft:chain[axis=y]
+setblock ~4 ~7 ~110 minecraft:chain[axis=y]
 setblock ~4 ~6 ~110 soul_lantern
-setblock ~-4 ~8 ~114 chain[axis=y]
-setblock ~-4 ~7 ~114 chain[axis=y]
+setblock ~-4 ~8 ~114 minecraft:chain[axis=y]
+setblock ~-4 ~7 ~114 minecraft:chain[axis=y]
 setblock ~-4 ~6 ~114 soul_lantern
-setblock ~4 ~8 ~114 chain[axis=y]
-setblock ~4 ~7 ~114 chain[axis=y]
+setblock ~4 ~8 ~114 minecraft:chain[axis=y]
+setblock ~4 ~7 ~114 minecraft:chain[axis=y]
 setblock ~4 ~6 ~114 soul_lantern
-setblock ~0 ~8 ~112 chain[axis=y]
-setblock ~0 ~7 ~112 chain[axis=y]
+setblock ~0 ~8 ~112 minecraft:chain[axis=y]
+setblock ~0 ~7 ~112 minecraft:chain[axis=y]
 setblock ~0 ~6 ~112 soul_lantern
 
 # Banners (multiple levels)
