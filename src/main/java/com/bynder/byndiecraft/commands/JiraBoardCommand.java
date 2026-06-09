@@ -7,6 +7,7 @@ import com.bynder.byndiecraft.board.StatusColumn;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Location;
+import org.bukkit.block.Block;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -62,6 +63,12 @@ public class JiraBoardCommand implements CommandExecutor, TabCompleter {
 
             case "refresh":
                 return handleRefresh(sender);
+
+            case "setaichest":
+                return handleSetAIChest(sender);
+
+            case "aiinfo":
+                return handleAIInfo(sender);
 
             case "help":
                 sendHelp(sender);
@@ -202,6 +209,86 @@ public class JiraBoardCommand implements CommandExecutor, TabCompleter {
         return null;
     }
 
+    private boolean handleSetAIChest(CommandSender sender) {
+        if (!(sender instanceof Player player)) {
+            sender.sendMessage(Component.text("This command can only be used by players!")
+                    .color(NamedTextColor.RED));
+            return true;
+        }
+
+        if (!plugin.getConfig().getBoolean("ai.enabled", false)) {
+            player.sendMessage(Component.text("⚠ AI system is disabled. Set ai.enabled: true in config.yml")
+                    .color(NamedTextColor.YELLOW));
+            return true;
+        }
+
+        // Get the block the player is looking at
+        Block targetBlock = player.getTargetBlockExact(5);
+        if (targetBlock == null || targetBlock.getType() != org.bukkit.Material.CHEST) {
+            player.sendMessage(Component.text("⚠ You must be looking at a chest!")
+                    .color(NamedTextColor.YELLOW));
+            player.sendMessage(Component.text("Look at a chest and run this command again")
+                    .color(NamedTextColor.GRAY));
+            return true;
+        }
+
+        Location chestLocation = targetBlock.getLocation();
+        var aiChestListener = plugin.getAIChestListener();
+        if (aiChestListener != null) {
+            aiChestListener.setAIChestLocation(chestLocation);
+            player.sendMessage(Component.text("✓ AI Chest set at: " +
+                    String.format("(%d, %d, %d)", chestLocation.getBlockX(), chestLocation.getBlockY(), chestLocation.getBlockZ()))
+                    .color(NamedTextColor.GREEN));
+            player.sendMessage(Component.text("Place written books with Jira ticket keys in this chest to trigger AI implementation!")
+                    .color(NamedTextColor.GRAY));
+        } else {
+            player.sendMessage(Component.text("⚠ AI system not initialized")
+                    .color(NamedTextColor.RED));
+        }
+
+        return true;
+    }
+
+    private boolean handleAIInfo(CommandSender sender) {
+        sender.sendMessage(Component.text("=== AI System Info ===").color(NamedTextColor.GOLD));
+
+        boolean aiEnabled = plugin.getConfig().getBoolean("ai.enabled", false);
+        sender.sendMessage(Component.text("Status: " + (aiEnabled ? "ENABLED" : "DISABLED"))
+                .color(aiEnabled ? NamedTextColor.GREEN : NamedTextColor.RED));
+
+        if (!aiEnabled) {
+            sender.sendMessage(Component.text("Set ai.enabled: true in config.yml to enable Phase 2")
+                    .color(NamedTextColor.GRAY));
+            return true;
+        }
+
+        String mcpEndpoint = plugin.getConfig().getString("ai.mcp_endpoint");
+        sender.sendMessage(Component.text("MCP Endpoint: " + mcpEndpoint).color(NamedTextColor.AQUA));
+
+        String modelId = plugin.getConfig().getString("ai.bedrock.model_id");
+        sender.sendMessage(Component.text("Bedrock Model: " + modelId).color(NamedTextColor.AQUA));
+
+        var aiChestListener = plugin.getAIChestListener();
+        if (aiChestListener != null) {
+            Location aiChestLoc = aiChestListener.getAIChestLocation();
+            if (aiChestLoc != null) {
+                sender.sendMessage(Component.text(String.format("AI Chest: %s (%d, %d, %d)",
+                        aiChestLoc.getWorld().getName(),
+                        aiChestLoc.getBlockX(),
+                        aiChestLoc.getBlockY(),
+                        aiChestLoc.getBlockZ()))
+                        .color(NamedTextColor.GREEN));
+            } else {
+                sender.sendMessage(Component.text("AI Chest: Not configured")
+                        .color(NamedTextColor.YELLOW));
+                sender.sendMessage(Component.text("Use /jiraboard setaichest to configure")
+                        .color(NamedTextColor.GRAY));
+            }
+        }
+
+        return true;
+    }
+
     private void sendHelp(CommandSender sender) {
         sender.sendMessage(Component.text("=== Byndiecraft Commands ===").color(NamedTextColor.GOLD));
         sender.sendMessage(Component.text("/jiraboard info").color(NamedTextColor.YELLOW)
@@ -216,13 +303,19 @@ public class JiraBoardCommand implements CommandExecutor, TabCompleter {
                 .append(Component.text(" - Spawn/create the Jira board in-world").color(NamedTextColor.GRAY)));
         sender.sendMessage(Component.text("/jiraboard refresh").color(NamedTextColor.YELLOW)
                 .append(Component.text(" - Rebuild board with fresh Jira data").color(NamedTextColor.GRAY)));
+        sender.sendMessage(Component.text(""));
+        sender.sendMessage(Component.text("=== AI Commands (Phase 2) ===").color(NamedTextColor.LIGHT_PURPLE));
+        sender.sendMessage(Component.text("/jiraboard setaichest").color(NamedTextColor.YELLOW)
+                .append(Component.text(" - Set AI chest (look at chest)").color(NamedTextColor.GRAY)));
+        sender.sendMessage(Component.text("/jiraboard aiinfo").color(NamedTextColor.YELLOW)
+                .append(Component.text(" - Show AI system status").color(NamedTextColor.GRAY)));
     }
 
     @Nullable
     @Override
     public List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command, @NotNull String alias, @NotNull String[] args) {
         if (args.length == 1) {
-            return Arrays.asList("info", "setup", "spawn", "addcolumn", "refresh", "help");
+            return Arrays.asList("info", "setup", "spawn", "addcolumn", "refresh", "setaichest", "aiinfo", "debug", "help");
         }
 
         if (args.length == 2 && args[0].equalsIgnoreCase("addcolumn")) {
