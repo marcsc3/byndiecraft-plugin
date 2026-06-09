@@ -6,12 +6,16 @@ import com.bynder.byndiecraft.board.BoardSpawner;
 import com.bynder.byndiecraft.board.StatusColumn;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.Sound;
+import org.bukkit.World;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.Player;
+import org.bukkit.entity.TNTPrimed;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -62,6 +66,9 @@ public class JiraBoardCommand implements CommandExecutor, TabCompleter {
 
             case "refresh":
                 return handleRefresh(sender);
+
+            case "delete":
+                return handleDelete(sender);
 
             case "help":
                 sendHelp(sender);
@@ -187,6 +194,48 @@ public class JiraBoardCommand implements CommandExecutor, TabCompleter {
         return true;
     }
 
+    private boolean handleDelete(CommandSender sender) {
+        if (!(sender instanceof Player player)) {
+            sender.sendMessage(Component.text("This command can only be used by players!")
+                    .color(NamedTextColor.RED));
+            return true;
+        }
+
+        Location configAnchor = getAnchorLocation(player);
+        final Location anchor = configAnchor != null ? configAnchor : player.getLocation().getBlock().getLocation();
+
+        World world = anchor.getWorld();
+        if (world == null) return true;
+
+        int columns = boardManager.getBoard().getColumns().size();
+        int baseX = anchor.getBlockX();
+        int baseY = anchor.getBlockY();
+        int baseZ = anchor.getBlockZ();
+
+        player.sendMessage(Component.text("💥 Demolishing the board...")
+                .color(NamedTextColor.RED));
+
+        // Spawn TNT across the board area
+        for (int col = 0; col < columns; col++) {
+            int colX = baseX + (col * 4);
+            for (int y = baseY + 1; y >= baseY - 10; y -= 3) {
+                Location tntLoc = new Location(world, colX + 0.5, y + 0.5, baseZ + 0.5);
+                TNTPrimed tnt = world.spawn(tntLoc, TNTPrimed.class);
+                tnt.setFuseTicks(20 + (col * 10));
+            }
+        }
+
+        // Clear the board after explosions finish
+        Bukkit.getScheduler().runTaskLater(plugin, () -> {
+            boardSpawner.clearBoard(anchor, columns, 10);
+            player.sendMessage(Component.text("✓ Board destroyed!")
+                    .color(NamedTextColor.GREEN));
+            player.playSound(player.getLocation(), Sound.ENTITY_GENERIC_EXPLODE, 1.0f, 1.0f);
+        }, 80L + (columns * 10L));
+
+        return true;
+    }
+
     private Location getAnchorLocation(Player player) {
         var config = plugin.getConfig();
         if (config.contains("board.anchor")) {
@@ -216,13 +265,15 @@ public class JiraBoardCommand implements CommandExecutor, TabCompleter {
                 .append(Component.text(" - Spawn/create the Jira board in-world").color(NamedTextColor.GRAY)));
         sender.sendMessage(Component.text("/jiraboard refresh").color(NamedTextColor.YELLOW)
                 .append(Component.text(" - Rebuild board with fresh Jira data").color(NamedTextColor.GRAY)));
+        sender.sendMessage(Component.text("/jiraboard delete").color(NamedTextColor.YELLOW)
+                .append(Component.text(" - Explode the board with TNT!").color(NamedTextColor.GRAY)));
     }
 
     @Nullable
     @Override
     public List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command, @NotNull String alias, @NotNull String[] args) {
         if (args.length == 1) {
-            return Arrays.asList("info", "setup", "spawn", "addcolumn", "refresh", "help");
+            return Arrays.asList("info", "setup", "spawn", "addcolumn", "refresh", "delete", "help");
         }
 
         if (args.length == 2 && args[0].equalsIgnoreCase("addcolumn")) {
