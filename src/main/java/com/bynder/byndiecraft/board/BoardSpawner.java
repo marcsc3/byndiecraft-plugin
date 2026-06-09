@@ -214,7 +214,7 @@ public class BoardSpawner {
 
         meta.setTitle(ticket.getKey() + ": " + ticket.getSummary());
         meta.setAuthor("Jira");
-        meta.itemName(Component.text(ticket.getKey() + ": " + ticket.getSummary()));
+        meta.displayName(Component.text(ticket.getKey() + ": " + ticket.getSummary()).color(NamedTextColor.GOLD));
         meta.addPages(Component.text(ticket.getKey() + "\n\n" + ticket.getSummary() + "\n\nStatus: " + ticket.getStatus()));
 
         book.setItemMeta(meta);
