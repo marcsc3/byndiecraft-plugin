@@ -194,9 +194,10 @@ public class BoardSpawner {
 
         String desc = ticket.getDescription();
         if (desc != null && !desc.isEmpty()) {
-            // Book pages have a ~256 char display limit, split if needed
-            String pageText = desc.length() > 256 ? desc.substring(0, 256) + "..." : desc;
-            meta.addPages(Component.text(pageText));
+            for (int i = 0; i < desc.length(); i += 256) {
+                String pageText = desc.substring(i, Math.min(i + 256, desc.length()));
+                meta.addPages(Component.text(pageText));
+            }
         }
 
         book.setItemMeta(meta);

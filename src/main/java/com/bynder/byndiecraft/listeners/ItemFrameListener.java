@@ -158,6 +158,15 @@ public class ItemFrameListener implements Listener {
         plugin.getLogger().info("[ItemFrame] Extracted ticket key: " + ticketKey);
         plugin.getLogger().info("[ItemFrame] Target Jira status: " + targetStatus);
 
+        // Skip if the ticket is already in this status
+        Optional<String> cachedStatus = boardManager.getCachedStatus(ticketKey);
+        if (cachedStatus.isPresent() && cachedStatus.get().equalsIgnoreCase(targetStatus)) {
+            if (debugMode) {
+                plugin.getLogger().info("[ItemFrame] Ticket " + ticketKey + " already in status '" + targetStatus + "', skipping");
+            }
+            return;
+        }
+
         if (debugMode) {
             plugin.getLogger().info(String.format("Book placed: %s -> Column: %s (Jira: %s)",
                     ticketKey, column.getName(), targetStatus));
