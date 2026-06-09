@@ -196,7 +196,7 @@ public class JiraClient {
     public CompletableFuture<List<JiraTicket>> searchIssues(String projectKey) {
         return CompletableFuture.supplyAsync(() -> {
             try {
-                String jql = "project = \"" + projectKey + "\" ORDER BY status ASC";
+                String jql = "project = \"" + projectKey + "\" AND sprint in openSprints() ORDER BY status ASC";
                 String url = baseUrl + "/rest/api/3/search/jql";
 
                 JsonObject requestJson = new JsonObject();
