@@ -6,8 +6,10 @@ import com.google.gson.JsonObject;
 import okhttp3.*;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Base64;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
@@ -187,6 +189,59 @@ public class JiraClient {
             } catch (IOException e) {
                 logger.severe("Error transitioning issue " + issueKey + ": " + e.getMessage());
                 return false;
+            }
+        });
+    }
+
+    public CompletableFuture<List<JiraTicket>> searchIssues(String projectKey) {
+        return CompletableFuture.supplyAsync(() -> {
+            try {
+                String jql = "project = " + projectKey + " ORDER BY status ASC";
+                String url = baseUrl + "/rest/api/3/search?jql=" + java.net.URLEncoder.encode(jql, java.nio.charset.StandardCharsets.UTF_8) + "&maxResults=50&fields=summary,status";
+
+                Request request = new Request.Builder()
+                        .url(url)
+                        .header("Authorization", authHeader)
+                        .header("Accept", "application/json")
+                        .get()
+                        .build();
+
+                if (debugMode) {
+                    logger.info("Searching issues: " + jql);
+                }
+
+                try (Response response = httpClient.newCall(request).execute()) {
+                    if (!response.isSuccessful()) {
+                        logger.warning("Failed to search issues: " + response.code());
+                        return new ArrayList<>();
+                    }
+
+                    String responseBody = response.body().string();
+                    JsonObject json = gson.fromJson(responseBody, JsonObject.class);
+                    JsonArray issues = json.getAsJsonArray("issues");
+
+                    List<JiraTicket> tickets = new ArrayList<>();
+                    for (var element : issues) {
+                        JsonObject issue = element.getAsJsonObject();
+                        String key = issue.get("key").getAsString();
+                        JsonObject fields = issue.getAsJsonObject("fields");
+                        String summary = fields.get("summary").getAsString();
+                        JsonObject status = fields.getAsJsonObject("status");
+                        String statusName = status.get("name").getAsString();
+                        String statusId = status.get("id").getAsString();
+
+                        tickets.add(new JiraTicket(key, summary, statusName, statusId));
+                    }
+
+                    if (debugMode) {
+                        logger.info("Found " + tickets.size() + " issues");
+                    }
+
+                    return tickets;
+                }
+            } catch (IOException e) {
+                logger.severe("Error searching issues: " + e.getMessage());
+                return new ArrayList<>();
             }
         });
     }
