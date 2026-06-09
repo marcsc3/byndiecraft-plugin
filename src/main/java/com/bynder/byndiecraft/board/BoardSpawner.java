@@ -121,9 +121,13 @@ public class BoardSpawner {
             return;
         }
 
-        // Group tickets by their current status
+        // Group tickets by their current status (case-insensitive matching)
         Map<String, List<JiraTicket>> ticketsByStatus = tickets.stream()
-                .collect(Collectors.groupingBy(JiraTicket::getStatus));
+                .collect(Collectors.groupingBy(t -> t.getStatus().toLowerCase()));
+
+        if (plugin.getConfigLoader().isDebugMode()) {
+            plugin.getLogger().info("Ticket statuses found: " + ticketsByStatus.keySet());
+        }
 
         // Clear existing board
         clearBoard(anchor, columns.size(), MAX_TICKETS_PER_COLUMN);
@@ -157,8 +161,8 @@ public class BoardSpawner {
                 sign.update();
             }
 
-            // Get tickets for this column's status
-            List<JiraTicket> columnTickets = ticketsByStatus.getOrDefault(column.getJiraStatusName(), Collections.emptyList());
+            // Get tickets for this column's status (case-insensitive)
+            List<JiraTicket> columnTickets = ticketsByStatus.getOrDefault(column.getJiraStatusName().toLowerCase(), Collections.emptyList());
             int ticketCount = Math.min(columnTickets.size(), MAX_TICKETS_PER_COLUMN);
 
             // Clear existing frame locations for this column

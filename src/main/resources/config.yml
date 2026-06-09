@@ -13,7 +13,7 @@ jira:
   api_token: "${JIRA_API_TOKEN}"
 
   # Project key for your Jira board
-  project_key: "TAP"
+  project_key: "SHARE"
 
 board:
   # Minecraft world name where the board is located
@@ -29,13 +29,20 @@ board:
   # Status columns configuration
   # Each column represents a Jira status and contains item frame locations
   columns:
-    - name: "To Do"
-      jira_status_name: "To Do"
-      # These coordinates will be set by /jiraboard setup command
+    - name: "Ready to be Picked Up"
+      jira_status_name: "Ready to be Picked Up"
       frames: []
 
     - name: "In Progress"
       jira_status_name: "In Progress"
+      frames: []
+
+    - name: "Review"
+      jira_status_name: "Review"
+      frames: []
+
+    - name: "Merge"
+      jira_status_name: "Merge"
       frames: []
 
     - name: "Done"
