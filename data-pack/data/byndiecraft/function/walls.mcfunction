@@ -6,57 +6,57 @@
 # OUTER WALLS - BASE LAYER (tuff, 1 block)
 # ============================================
 
-fill ~-52 ~0 ~78 ~52 ~0 ~78 tuff_bricks
+fill ~-52 ~0 ~112 ~52 ~0 ~112 tuff_bricks
 fill ~-52 ~0 ~-42 ~52 ~0 ~-42 tuff_bricks
-fill ~-52 ~0 ~-42 ~-52 ~0 ~78 tuff_bricks
-fill ~52 ~0 ~-42 ~52 ~0 ~78 tuff_bricks
+fill ~-52 ~0 ~-42 ~-52 ~0 ~112 tuff_bricks
+fill ~52 ~0 ~-42 ~52 ~0 ~112 tuff_bricks
 
 # ============================================
 # OUTER WALLS - MAIN BODY (deepslate bricks, rows 1-3)
 # ============================================
 
 # South wall
-fill ~-52 ~1 ~78 ~52 ~3 ~78 deepslate_bricks
+fill ~-52 ~1 ~112 ~52 ~3 ~112 deepslate_bricks
 # North wall
 fill ~-52 ~1 ~-42 ~52 ~3 ~-42 deepslate_bricks
 # West wall
-fill ~-52 ~1 ~-42 ~-52 ~3 ~78 deepslate_bricks
+fill ~-52 ~1 ~-42 ~-52 ~3 ~112 deepslate_bricks
 # East wall
-fill ~52 ~1 ~-42 ~52 ~3 ~78 deepslate_bricks
+fill ~52 ~1 ~-42 ~52 ~3 ~112 deepslate_bricks
 
 # ============================================
 # WALLS - TOP ROW (polished deepslate for contrast, row 4)
 # ============================================
 
-fill ~-52 ~4 ~78 ~52 ~4 ~78 polished_deepslate
+fill ~-52 ~4 ~112 ~52 ~4 ~112 polished_deepslate
 fill ~-52 ~4 ~-42 ~52 ~4 ~-42 polished_deepslate
-fill ~-52 ~4 ~-42 ~-52 ~4 ~78 polished_deepslate
-fill ~52 ~4 ~-42 ~52 ~4 ~78 polished_deepslate
+fill ~-52 ~4 ~-42 ~-52 ~4 ~112 polished_deepslate
+fill ~52 ~4 ~-42 ~52 ~4 ~112 polished_deepslate
 
 # Crenellations (battlements - alternating slabs on top)
-fill ~-52 ~5 ~78 ~52 ~5 ~78 deepslate_brick_slab
+fill ~-52 ~5 ~112 ~52 ~5 ~112 deepslate_brick_slab
 fill ~-52 ~5 ~-42 ~52 ~5 ~-42 deepslate_brick_slab
-fill ~-52 ~5 ~-42 ~-52 ~5 ~78 deepslate_brick_slab
-fill ~52 ~5 ~-42 ~52 ~5 ~78 deepslate_brick_slab
+fill ~-52 ~5 ~-42 ~-52 ~5 ~112 deepslate_brick_slab
+fill ~52 ~5 ~-42 ~52 ~5 ~112 deepslate_brick_slab
 
 # ============================================
 # MOSSY/CRACKED PATCHES (texture variation on south wall)
 # ============================================
 
 # South wall patches
-setblock ~-40 ~1 ~78 mossy_stone_bricks
-setblock ~-39 ~2 ~78 cracked_deepslate_bricks
-setblock ~-38 ~1 ~78 mossy_stone_bricks
-setblock ~-20 ~2 ~78 cracked_deepslate_bricks
-setblock ~-19 ~1 ~78 mossy_stone_bricks
-setblock ~-18 ~2 ~78 mossy_stone_bricks
-setblock ~15 ~1 ~78 cracked_deepslate_bricks
-setblock ~16 ~2 ~78 mossy_stone_bricks
-setblock ~17 ~1 ~78 mossy_stone_bricks
-setblock ~30 ~2 ~78 cracked_deepslate_bricks
-setblock ~31 ~1 ~78 mossy_stone_bricks
-setblock ~40 ~1 ~78 mossy_stone_bricks
-setblock ~41 ~2 ~78 cracked_deepslate_bricks
+setblock ~-40 ~1 ~112 mossy_stone_bricks
+setblock ~-39 ~2 ~112 cracked_deepslate_bricks
+setblock ~-38 ~1 ~112 mossy_stone_bricks
+setblock ~-20 ~2 ~112 cracked_deepslate_bricks
+setblock ~-19 ~1 ~112 mossy_stone_bricks
+setblock ~-18 ~2 ~112 mossy_stone_bricks
+setblock ~15 ~1 ~112 cracked_deepslate_bricks
+setblock ~16 ~2 ~112 mossy_stone_bricks
+setblock ~17 ~1 ~112 mossy_stone_bricks
+setblock ~30 ~2 ~112 cracked_deepslate_bricks
+setblock ~31 ~1 ~112 mossy_stone_bricks
+setblock ~40 ~1 ~112 mossy_stone_bricks
+setblock ~41 ~2 ~112 cracked_deepslate_bricks
 
 # North wall patches
 setblock ~-35 ~1 ~-42 mossy_stone_bricks
@@ -100,14 +100,14 @@ setblock ~52 ~2 ~-30 mossy_stone_bricks
 # ============================================
 
 # South wall buttresses (outer = z=79)
-fill ~-30 ~0 ~79 ~-30 ~4 ~79 stone_bricks
-setblock ~-30 ~5 ~79 stone_brick_slab
-fill ~-10 ~0 ~79 ~-10 ~4 ~79 stone_bricks
-setblock ~-10 ~5 ~79 stone_brick_slab
-fill ~10 ~0 ~79 ~10 ~4 ~79 stone_bricks
-setblock ~10 ~5 ~79 stone_brick_slab
-fill ~30 ~0 ~79 ~30 ~4 ~79 stone_bricks
-setblock ~30 ~5 ~79 stone_brick_slab
+fill ~-30 ~0 ~113 ~-30 ~4 ~113 stone_bricks
+setblock ~-30 ~5 ~113 stone_brick_slab
+fill ~-10 ~0 ~113 ~-10 ~4 ~113 stone_bricks
+setblock ~-10 ~5 ~113 stone_brick_slab
+fill ~10 ~0 ~113 ~10 ~4 ~113 stone_bricks
+setblock ~10 ~5 ~113 stone_brick_slab
+fill ~30 ~0 ~113 ~30 ~4 ~113 stone_bricks
+setblock ~30 ~5 ~113 stone_brick_slab
 
 # North wall buttresses (outer = z=-43)
 fill ~-30 ~0 ~-43 ~-30 ~4 ~-43 stone_bricks
@@ -144,22 +144,22 @@ setblock ~53 ~5 ~-25 stone_brick_slab
 # ============================================
 
 # Southwest tower
-fill ~-54 ~0 ~76 ~-50 ~0 ~80 tuff_bricks
-fill ~-54 ~1 ~76 ~-50 ~6 ~80 deepslate_bricks
-fill ~-54 ~7 ~76 ~-50 ~7 ~80 polished_deepslate
-fill ~-54 ~8 ~76 ~-50 ~8 ~80 deepslate_brick_slab
-setblock ~-52 ~7 ~78 soul_lantern
-setblock ~-53 ~3 ~78 cracked_deepslate_bricks
-setblock ~-51 ~4 ~78 mossy_stone_bricks
+fill ~-54 ~0 ~110 ~-50 ~0 ~114 tuff_bricks
+fill ~-54 ~1 ~110 ~-50 ~6 ~114 deepslate_bricks
+fill ~-54 ~7 ~110 ~-50 ~7 ~114 polished_deepslate
+fill ~-54 ~8 ~110 ~-50 ~8 ~114 deepslate_brick_slab
+setblock ~-52 ~7 ~112 soul_lantern
+setblock ~-53 ~3 ~112 cracked_deepslate_bricks
+setblock ~-51 ~4 ~112 mossy_stone_bricks
 
 # Southeast tower
-fill ~50 ~0 ~76 ~54 ~0 ~80 tuff_bricks
-fill ~50 ~1 ~76 ~54 ~6 ~80 deepslate_bricks
-fill ~50 ~7 ~76 ~54 ~7 ~80 polished_deepslate
-fill ~50 ~8 ~76 ~54 ~8 ~80 deepslate_brick_slab
-setblock ~52 ~7 ~78 soul_lantern
-setblock ~53 ~3 ~78 cracked_deepslate_bricks
-setblock ~51 ~4 ~78 mossy_stone_bricks
+fill ~50 ~0 ~110 ~54 ~0 ~114 tuff_bricks
+fill ~50 ~1 ~110 ~54 ~6 ~114 deepslate_bricks
+fill ~50 ~7 ~110 ~54 ~7 ~114 polished_deepslate
+fill ~50 ~8 ~110 ~54 ~8 ~114 deepslate_brick_slab
+setblock ~52 ~7 ~112 soul_lantern
+setblock ~53 ~3 ~112 cracked_deepslate_bricks
+setblock ~51 ~4 ~112 mossy_stone_bricks
 
 # Northwest tower
 fill ~-54 ~0 ~-44 ~-50 ~0 ~-40 tuff_bricks
@@ -197,50 +197,27 @@ fill ~50 ~7 ~15 ~54 ~7 ~21 polished_deepslate
 fill ~50 ~8 ~15 ~54 ~8 ~21 deepslate_brick_slab
 setblock ~52 ~7 ~18 soul_lantern
 
-# ============================================
-# SOUTH GATE (main entrance)
-# ============================================
-
-fill ~-2 ~0 ~78 ~2 ~3 ~78 air
-fill ~-3 ~0 ~78 ~-3 ~6 ~78 deepslate_bricks
-fill ~3 ~0 ~78 ~3 ~6 ~78 deepslate_bricks
-fill ~-3 ~7 ~78 ~3 ~7 ~78 polished_deepslate
-fill ~-3 ~8 ~78 ~3 ~8 ~78 deepslate_brick_slab
-
-# Gate arch
-setblock ~-2 ~4 ~78 deepslate_brick_stairs[facing=east,half=bottom]
-setblock ~2 ~4 ~78 deepslate_brick_stairs[facing=west,half=bottom]
-
-# Gate pillars (stone brick accent)
-fill ~-3 ~0 ~79 ~-3 ~6 ~79 stone_bricks
-fill ~3 ~0 ~79 ~3 ~6 ~79 stone_bricks
-
-# Gate lanterns
-setblock ~-3 ~5 ~77 soul_lantern
-setblock ~3 ~5 ~77 soul_lantern
-
-# Gate banners
-setblock ~-3 ~6 ~77 red_wall_banner[facing=north]
-setblock ~3 ~6 ~77 red_wall_banner[facing=north]
+# South gate (calls separate gate function)
+function byndiecraft:gate
 
 # ============================================
 # WALL-TOP WALKWAY
 # ============================================
 
-fill ~-50 ~4 ~77 ~50 ~4 ~77 deepslate_brick_slab
+fill ~-50 ~4 ~111 ~50 ~4 ~111 deepslate_brick_slab
 fill ~-50 ~4 ~-41 ~50 ~4 ~-41 deepslate_brick_slab
-fill ~-51 ~4 ~-41 ~-51 ~4 ~77 deepslate_brick_slab
-fill ~51 ~4 ~-41 ~51 ~4 ~77 deepslate_brick_slab
+fill ~-51 ~4 ~-41 ~-51 ~4 ~111 deepslate_brick_slab
+fill ~51 ~4 ~-41 ~51 ~4 ~111 deepslate_brick_slab
 
 # ============================================
 # WALL LANTERNS (inner face, every 15 blocks)
 # ============================================
 
 # South wall inner
-setblock ~-30 ~3 ~77 soul_lantern
-setblock ~-15 ~3 ~77 soul_lantern
-setblock ~15 ~3 ~77 soul_lantern
-setblock ~30 ~3 ~77 soul_lantern
+setblock ~-30 ~3 ~111 soul_lantern
+setblock ~-15 ~3 ~111 soul_lantern
+setblock ~15 ~3 ~111 soul_lantern
+setblock ~30 ~3 ~111 soul_lantern
 
 # North wall inner
 setblock ~-30 ~3 ~-41 soul_lantern
@@ -274,7 +251,7 @@ setblock ~-52 ~1 ~40 moss_block
 setblock ~52 ~3 ~65 moss_block
 setblock ~52 ~2 ~50 moss_block
 setblock ~52 ~1 ~35 moss_block
-setblock ~-40 ~3 ~78 moss_block
-setblock ~-25 ~2 ~78 moss_block
-setblock ~25 ~3 ~78 moss_block
-setblock ~40 ~2 ~78 moss_block
+setblock ~-40 ~3 ~112 moss_block
+setblock ~-25 ~2 ~112 moss_block
+setblock ~25 ~3 ~112 moss_block
+setblock ~40 ~2 ~112 moss_block

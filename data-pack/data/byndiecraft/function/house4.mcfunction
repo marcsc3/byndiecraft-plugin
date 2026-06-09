@@ -1,72 +1,71 @@
-# House 4 - Armando's House (northeast of courtyard)
-# Position: centered at ~12 ~0 ~33, door faces south (toward courtyard)
-# Dark wood palette: spruce planks, dark oak
+# House 4 - Armando's house
+# Position: ~12 ~0 ~33, door faces SOUTH (toward courtyard)
+# Banner: Purple
 
-# Foundation (13x13)
+# Foundation (13x13 polished deepslate)
 fill ~6 ~-1 ~27 ~18 ~-1 ~39 polished_deepslate
 fill ~6 ~0 ~27 ~18 ~0 ~39 polished_deepslate
 
-# Walls
-fill ~7 ~1 ~28 ~17 ~5 ~28 spruce_planks
-fill ~7 ~1 ~38 ~17 ~5 ~38 spruce_planks
-fill ~7 ~1 ~28 ~7 ~5 ~38 spruce_planks
-fill ~17 ~1 ~28 ~17 ~5 ~38 spruce_planks
+# Walls (spruce planks, 4 high)
+fill ~6 ~1 ~27 ~18 ~4 ~27 spruce_planks
+fill ~6 ~1 ~39 ~18 ~4 ~39 spruce_planks
+fill ~6 ~1 ~27 ~6 ~4 ~39 spruce_planks
+fill ~18 ~1 ~27 ~18 ~4 ~39 spruce_planks
 
-# Dark panels
-fill ~9 ~2 ~28 ~15 ~4 ~28 dark_oak_planks
-fill ~9 ~2 ~38 ~15 ~4 ~38 dark_oak_planks
-fill ~7 ~2 ~30 ~7 ~4 ~36 dark_oak_planks
-fill ~17 ~2 ~30 ~17 ~4 ~36 dark_oak_planks
+# Interior air
+fill ~7 ~1 ~28 ~17 ~4 ~38 air
 
-# Windows
-fill ~11 ~3 ~28 ~13 ~3 ~28 spruce_fence
-fill ~11 ~3 ~38 ~13 ~3 ~38 spruce_fence
-fill ~7 ~3 ~32 ~7 ~3 ~34 spruce_fence
-fill ~17 ~3 ~32 ~17 ~3 ~34 spruce_fence
+# Door (south-facing, center of south wall)
+setblock ~12 ~1 ~39 spruce_door[facing=north,half=lower,hinge=left]
+setblock ~12 ~2 ~39 spruce_door[facing=north,half=upper,hinge=left]
 
-# Door (south face - toward courtyard)
-setblock ~12 ~1 ~38 air
-setblock ~12 ~2 ~38 air
-setblock ~11 ~1 ~38 air
-setblock ~11 ~2 ~38 air
+# Windows (spruce fence)
+setblock ~9 ~2 ~39 spruce_fence
+setblock ~9 ~3 ~39 spruce_fence
+setblock ~15 ~2 ~39 spruce_fence
+setblock ~15 ~3 ~39 spruce_fence
+setblock ~6 ~2 ~33 spruce_fence
+setblock ~6 ~3 ~33 spruce_fence
+setblock ~18 ~2 ~33 spruce_fence
+setblock ~18 ~3 ~33 spruce_fence
+setblock ~12 ~2 ~27 spruce_fence
+setblock ~12 ~3 ~27 spruce_fence
 
-# Floor interior
-fill ~8 ~0 ~29 ~16 ~0 ~37 spruce_planks
+# Roof - tier 1 (dark oak stairs, overhanging by 1)
+fill ~5 ~5 ~26 ~19 ~5 ~40 dark_oak_slab
+fill ~5 ~5 ~26 ~19 ~5 ~26 dark_oak_stairs[facing=south,half=bottom]
+fill ~5 ~5 ~40 ~19 ~5 ~40 dark_oak_stairs[facing=north,half=bottom]
+fill ~5 ~5 ~27 ~5 ~5 ~39 dark_oak_stairs[facing=east,half=bottom]
+fill ~19 ~5 ~27 ~19 ~5 ~39 dark_oak_stairs[facing=west,half=bottom]
 
-# Roof - First tier
-fill ~5 ~6 ~26 ~19 ~6 ~40 dark_oak_slab
-fill ~6 ~6 ~27 ~18 ~6 ~27 dark_oak_stairs[facing=south,half=bottom]
-fill ~6 ~6 ~39 ~18 ~6 ~39 dark_oak_stairs[facing=north,half=bottom]
-fill ~6 ~6 ~28 ~6 ~6 ~38 dark_oak_stairs[facing=east,half=bottom]
-fill ~18 ~6 ~28 ~18 ~6 ~38 dark_oak_stairs[facing=west,half=bottom]
-
-# Roof - Second tier
-fill ~8 ~7 ~29 ~16 ~7 ~37 dark_oak_slab
-fill ~9 ~7 ~29 ~15 ~7 ~29 dark_oak_stairs[facing=south,half=bottom]
-fill ~9 ~7 ~37 ~15 ~7 ~37 dark_oak_stairs[facing=north,half=bottom]
-fill ~8 ~7 ~30 ~8 ~7 ~36 dark_oak_stairs[facing=east,half=bottom]
-fill ~16 ~7 ~30 ~16 ~7 ~36 dark_oak_stairs[facing=west,half=bottom]
+# Roof - tier 2 (narrower)
+fill ~7 ~6 ~28 ~17 ~6 ~38 dark_oak_slab
+fill ~7 ~6 ~28 ~17 ~6 ~28 dark_oak_stairs[facing=south,half=bottom]
+fill ~7 ~6 ~38 ~17 ~6 ~38 dark_oak_stairs[facing=north,half=bottom]
+fill ~7 ~6 ~29 ~7 ~6 ~37 dark_oak_stairs[facing=east,half=bottom]
+fill ~17 ~6 ~29 ~17 ~6 ~37 dark_oak_stairs[facing=west,half=bottom]
 
 # Roof peak
-fill ~10 ~8 ~31 ~14 ~8 ~35 dark_oak_slab
+fill ~9 ~7 ~30 ~15 ~7 ~36 dark_oak_planks
+setblock ~12 ~8 ~33 amethyst_block
+setblock ~12 ~9 ~33 amethyst_cluster[facing=up]
 
-# Amethyst accent
-setblock ~12 ~9 ~33 amethyst_block
-setblock ~12 ~10 ~33 amethyst_cluster[facing=up]
+# Interior: bed, chest, crafting table, lantern
+setblock ~16 ~1 ~28 purple_bed[facing=south,part=head]
+setblock ~16 ~1 ~29 purple_bed[facing=south,part=foot]
+setblock ~8 ~1 ~28 chest[facing=south]
+setblock ~8 ~1 ~30 crafting_table
+setblock ~12 ~4 ~33 soul_lantern
 
-# Interior
-setblock ~16 ~1 ~29 crafting_table
-setblock ~15 ~1 ~29 chest[facing=south]
-setblock ~12 ~1 ~36 purple_bed[facing=north,part=foot]
-setblock ~12 ~1 ~35 purple_bed[facing=north,part=head]
-setblock ~12 ~1 ~29 soul_lantern
+# Floor (spruce planks inside)
+fill ~7 ~0 ~28 ~17 ~0 ~38 spruce_planks
 
-# Entrance steps
-setblock ~12 ~0 ~39 polished_deepslate_stairs[facing=south]
-setblock ~11 ~0 ~39 polished_deepslate_stairs[facing=south]
-
-# Name banner (purple, beside door)
-setblock ~13 ~3 ~38 purple_wall_banner[facing=south]
+# Banner (purple, beside door on south face)
+setblock ~13 ~3 ~39 purple_wall_banner[facing=north]
 
 # Name sign
-setblock ~10 ~2 ~39 spruce_wall_sign[facing=south]{front_text:{messages:['{"text":"Armando","color":"gold","bold":true}','{"text":""}','{"text":""}','{"text":""}']}}
+setblock ~11 ~3 ~39 spruce_wall_sign[facing=north]{front_text:{messages:['{"text":"Armando"}','{"text":""}','{"text":""}','{"text":""}']}}
+
+# Soul lanterns at entrance
+setblock ~10 ~3 ~40 soul_lantern
+setblock ~14 ~3 ~40 soul_lantern

@@ -1,72 +1,71 @@
-# House 2 - Marc's House (west of courtyard)
-# Position: centered at ~-20 ~0 ~50, door faces east (toward courtyard)
-# Dark wood palette: spruce planks, dark oak
+# House 2 - Marc's house
+# Position: ~-20 ~0 ~50, door faces EAST (toward courtyard)
+# Banner: Cyan
 
-# Foundation (13x13)
+# Foundation (13x13 polished deepslate)
 fill ~-26 ~-1 ~44 ~-14 ~-1 ~56 polished_deepslate
 fill ~-26 ~0 ~44 ~-14 ~0 ~56 polished_deepslate
 
-# Walls
-fill ~-25 ~1 ~45 ~-15 ~5 ~45 spruce_planks
-fill ~-25 ~1 ~55 ~-15 ~5 ~55 spruce_planks
-fill ~-25 ~1 ~45 ~-25 ~5 ~55 spruce_planks
-fill ~-15 ~1 ~45 ~-15 ~5 ~55 spruce_planks
+# Walls (spruce planks, 4 high)
+fill ~-26 ~1 ~44 ~-14 ~4 ~44 spruce_planks
+fill ~-26 ~1 ~56 ~-14 ~4 ~56 spruce_planks
+fill ~-26 ~1 ~44 ~-26 ~4 ~56 spruce_planks
+fill ~-14 ~1 ~44 ~-14 ~4 ~56 spruce_planks
 
-# Dark panels
-fill ~-23 ~2 ~45 ~-17 ~4 ~45 dark_oak_planks
-fill ~-23 ~2 ~55 ~-17 ~4 ~55 dark_oak_planks
-fill ~-25 ~2 ~47 ~-25 ~4 ~53 dark_oak_planks
-fill ~-15 ~2 ~47 ~-15 ~4 ~53 dark_oak_planks
+# Interior air
+fill ~-25 ~1 ~45 ~-15 ~4 ~55 air
 
-# Windows
-fill ~-21 ~3 ~45 ~-19 ~3 ~45 spruce_fence
-fill ~-21 ~3 ~55 ~-19 ~3 ~55 spruce_fence
-fill ~-25 ~3 ~49 ~-25 ~3 ~51 spruce_fence
-fill ~-15 ~3 ~49 ~-15 ~3 ~51 spruce_fence
+# Door (east-facing, center of east wall)
+setblock ~-14 ~1 ~50 spruce_door[facing=west,half=lower,hinge=left]
+setblock ~-14 ~2 ~50 spruce_door[facing=west,half=upper,hinge=left]
 
-# Door (east face - toward courtyard)
-setblock ~-15 ~1 ~50 air
-setblock ~-15 ~2 ~50 air
-setblock ~-15 ~1 ~49 air
-setblock ~-15 ~2 ~49 air
+# Windows (spruce fence)
+setblock ~-14 ~2 ~47 spruce_fence
+setblock ~-14 ~3 ~47 spruce_fence
+setblock ~-14 ~2 ~53 spruce_fence
+setblock ~-14 ~3 ~53 spruce_fence
+setblock ~-26 ~2 ~50 spruce_fence
+setblock ~-26 ~3 ~50 spruce_fence
+setblock ~-20 ~2 ~44 spruce_fence
+setblock ~-20 ~3 ~44 spruce_fence
+setblock ~-20 ~2 ~56 spruce_fence
+setblock ~-20 ~3 ~56 spruce_fence
 
-# Floor interior
-fill ~-24 ~0 ~46 ~-16 ~0 ~54 spruce_planks
+# Roof - tier 1 (dark oak stairs, overhanging by 1)
+fill ~-27 ~5 ~43 ~-13 ~5 ~57 dark_oak_slab
+fill ~-27 ~5 ~43 ~-13 ~5 ~43 dark_oak_stairs[facing=south,half=bottom]
+fill ~-27 ~5 ~57 ~-13 ~5 ~57 dark_oak_stairs[facing=north,half=bottom]
+fill ~-27 ~5 ~44 ~-27 ~5 ~56 dark_oak_stairs[facing=east,half=bottom]
+fill ~-13 ~5 ~44 ~-13 ~5 ~56 dark_oak_stairs[facing=west,half=bottom]
 
-# Roof - First tier
-fill ~-27 ~6 ~43 ~-13 ~6 ~57 dark_oak_slab
-fill ~-26 ~6 ~44 ~-14 ~6 ~44 dark_oak_stairs[facing=south,half=bottom]
-fill ~-26 ~6 ~56 ~-14 ~6 ~56 dark_oak_stairs[facing=north,half=bottom]
-fill ~-26 ~6 ~45 ~-26 ~6 ~55 dark_oak_stairs[facing=east,half=bottom]
-fill ~-14 ~6 ~45 ~-14 ~6 ~55 dark_oak_stairs[facing=west,half=bottom]
-
-# Roof - Second tier
-fill ~-24 ~7 ~46 ~-16 ~7 ~54 dark_oak_slab
-fill ~-23 ~7 ~46 ~-17 ~7 ~46 dark_oak_stairs[facing=south,half=bottom]
-fill ~-23 ~7 ~54 ~-17 ~7 ~54 dark_oak_stairs[facing=north,half=bottom]
-fill ~-24 ~7 ~47 ~-24 ~7 ~53 dark_oak_stairs[facing=east,half=bottom]
-fill ~-16 ~7 ~47 ~-16 ~7 ~53 dark_oak_stairs[facing=west,half=bottom]
+# Roof - tier 2 (narrower)
+fill ~-25 ~6 ~45 ~-15 ~6 ~55 dark_oak_slab
+fill ~-25 ~6 ~45 ~-15 ~6 ~45 dark_oak_stairs[facing=south,half=bottom]
+fill ~-25 ~6 ~55 ~-15 ~6 ~55 dark_oak_stairs[facing=north,half=bottom]
+fill ~-25 ~6 ~46 ~-25 ~6 ~54 dark_oak_stairs[facing=east,half=bottom]
+fill ~-15 ~6 ~46 ~-15 ~6 ~54 dark_oak_stairs[facing=west,half=bottom]
 
 # Roof peak
-fill ~-22 ~8 ~48 ~-18 ~8 ~52 dark_oak_slab
+fill ~-23 ~7 ~47 ~-17 ~7 ~53 dark_oak_planks
+setblock ~-20 ~8 ~50 amethyst_block
+setblock ~-20 ~9 ~50 amethyst_cluster[facing=up]
 
-# Amethyst accent
-setblock ~-20 ~9 ~50 amethyst_block
-setblock ~-20 ~10 ~50 amethyst_cluster[facing=up]
+# Interior: bed, chest, crafting table, lantern
+setblock ~-24 ~1 ~54 cyan_bed[facing=north,part=head]
+setblock ~-24 ~1 ~55 cyan_bed[facing=north,part=foot]
+setblock ~-24 ~1 ~45 chest[facing=east]
+setblock ~-22 ~1 ~45 crafting_table
+setblock ~-20 ~4 ~50 soul_lantern
 
-# Interior
-setblock ~-24 ~1 ~53 crafting_table
-setblock ~-24 ~1 ~54 chest[facing=north]
-setblock ~-20 ~1 ~46 cyan_bed[facing=south,part=foot]
-setblock ~-20 ~1 ~47 cyan_bed[facing=south,part=head]
-setblock ~-20 ~1 ~53 soul_lantern
+# Floor (spruce planks inside)
+fill ~-25 ~0 ~45 ~-15 ~0 ~55 spruce_planks
 
-# Entrance steps
-setblock ~-14 ~0 ~50 polished_deepslate_stairs[facing=east]
-setblock ~-14 ~0 ~49 polished_deepslate_stairs[facing=east]
-
-# Name banner (cyan, beside door)
-setblock ~-15 ~3 ~51 cyan_wall_banner[facing=east]
+# Banner (cyan, beside door on east face)
+setblock ~-14 ~3 ~51 cyan_wall_banner[facing=west]
 
 # Name sign
-setblock ~-14 ~2 ~48 spruce_wall_sign[facing=east]{front_text:{messages:['{"text":"Marc","color":"gold","bold":true}','{"text":""}','{"text":""}','{"text":""}']}}
+setblock ~-14 ~3 ~49 spruce_wall_sign[facing=west]{front_text:{messages:['{"text":"Marc"}','{"text":""}','{"text":""}','{"text":""}']}}
+
+# Soul lanterns at entrance
+setblock ~-13 ~3 ~48 soul_lantern
+setblock ~-13 ~3 ~52 soul_lantern

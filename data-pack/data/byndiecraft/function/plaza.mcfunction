@@ -1,56 +1,50 @@
-# Plaza - 100 wide x 20 deep flat area for Jira board bookshelves
-# Positioned north of the atrium, from z=5 to z=-15 (center at ~0 ~0 ~-5)
-# Directly connected to atrium (atrium floor ends at z=5)
+# Plaza - 50 wide x 30 deep, for Jira bookshelf board
+# Centered at ~0 ~-1 ~-5 (just north of atrium)
 
-# Main floor (100 wide x 20 deep)
-fill ~-50 ~-1 ~-15 ~50 ~-1 ~5 polished_deepslate
+# Main floor (polished deepslate)
+fill ~-25 ~-1 ~-20 ~25 ~-1 ~9 polished_deepslate
 
-# Outer border (gilded blackstone)
-fill ~-50 ~-1 ~-15 ~50 ~-1 ~-15 gilded_blackstone
-fill ~-50 ~-1 ~5 ~50 ~-1 ~5 gilded_blackstone
-fill ~-50 ~-1 ~-15 ~-50 ~-1 ~5 gilded_blackstone
-fill ~50 ~-1 ~-15 ~50 ~-1 ~5 gilded_blackstone
+# Border trim (gilded blackstone)
+fill ~-25 ~-1 ~-20 ~25 ~-1 ~-20 gilded_blackstone
+fill ~-25 ~-1 ~9 ~25 ~-1 ~9 gilded_blackstone
+fill ~-25 ~-1 ~-20 ~-25 ~-1 ~9 gilded_blackstone
+fill ~25 ~-1 ~-20 ~25 ~-1 ~9 gilded_blackstone
 
-# Inner decorative border
-fill ~-48 ~-1 ~-13 ~48 ~-1 ~-13 polished_blackstone_bricks
-fill ~-48 ~-1 ~3 ~48 ~-1 ~3 polished_blackstone_bricks
-fill ~-48 ~-1 ~-13 ~-48 ~-1 ~3 polished_blackstone_bricks
-fill ~48 ~-1 ~-13 ~48 ~-1 ~3 polished_blackstone_bricks
+# Inner accent border (polished blackstone)
+fill ~-24 ~-1 ~-19 ~24 ~-1 ~-19 polished_blackstone
+fill ~-24 ~-1 ~8 ~24 ~-1 ~8 polished_blackstone
+fill ~-24 ~-1 ~-19 ~-24 ~-1 ~8 polished_blackstone
+fill ~24 ~-1 ~-19 ~24 ~-1 ~8 polished_blackstone
 
-# Corner accents
-setblock ~-50 ~-1 ~-15 amethyst_block
-setblock ~50 ~-1 ~-15 amethyst_block
-setblock ~-50 ~-1 ~5 amethyst_block
-setblock ~50 ~-1 ~5 amethyst_block
-setblock ~-50 ~0 ~-15 amethyst_cluster[facing=up]
-setblock ~50 ~0 ~-15 amethyst_cluster[facing=up]
-setblock ~-50 ~0 ~5 amethyst_cluster[facing=up]
-setblock ~50 ~0 ~5 amethyst_cluster[facing=up]
+# Low walls on north/east/west sides (polished deepslate, 2 high)
+fill ~-25 ~0 ~-20 ~25 ~1 ~-20 polished_deepslate_slab
+fill ~-25 ~0 ~-20 ~-25 ~1 ~9 polished_deepslate_slab
+fill ~25 ~0 ~-20 ~25 ~1 ~9 polished_deepslate_slab
 
-# Soul lantern pillars along north edge (every 20 blocks)
-setblock ~-40 ~0 ~-13 spruce_fence
-setblock ~-40 ~1 ~-13 soul_lantern
-setblock ~-20 ~0 ~-13 spruce_fence
-setblock ~-20 ~1 ~-13 soul_lantern
-setblock ~0 ~0 ~-13 spruce_fence
-setblock ~0 ~1 ~-13 soul_lantern
-setblock ~20 ~0 ~-13 spruce_fence
-setblock ~20 ~1 ~-13 soul_lantern
-setblock ~40 ~0 ~-13 spruce_fence
-setblock ~40 ~1 ~-13 soul_lantern
+# Pillar accents at corners and midpoints
+fill ~-25 ~0 ~-20 ~-25 ~2 ~-20 deepslate_bricks
+fill ~25 ~0 ~-20 ~25 ~2 ~-20 deepslate_bricks
+fill ~-25 ~0 ~9 ~-25 ~2 ~9 deepslate_bricks
+fill ~25 ~0 ~9 ~25 ~2 ~9 deepslate_bricks
+fill ~-12 ~0 ~-20 ~-12 ~2 ~-20 deepslate_bricks
+fill ~12 ~0 ~-20 ~12 ~2 ~-20 deepslate_bricks
+fill ~0 ~0 ~-20 ~0 ~2 ~-20 deepslate_bricks
 
-# Soul lantern pillars along south edge
-setblock ~-40 ~0 ~3 spruce_fence
-setblock ~-40 ~1 ~3 soul_lantern
-setblock ~-20 ~0 ~3 spruce_fence
-setblock ~-20 ~1 ~3 soul_lantern
-setblock ~20 ~0 ~3 spruce_fence
-setblock ~20 ~1 ~3 soul_lantern
-setblock ~40 ~0 ~3 spruce_fence
-setblock ~40 ~1 ~3 soul_lantern
+# Lanterns on pillars
+setblock ~-25 ~3 ~-20 soul_lantern
+setblock ~25 ~3 ~-20 soul_lantern
+setblock ~-25 ~3 ~9 soul_lantern
+setblock ~25 ~3 ~9 soul_lantern
+setblock ~-12 ~3 ~-20 soul_lantern
+setblock ~12 ~3 ~-20 soul_lantern
+setblock ~0 ~3 ~-20 soul_lantern
 
-# East/West edge lanterns
-setblock ~-48 ~0 ~-5 spruce_fence
-setblock ~-48 ~1 ~-5 soul_lantern
-setblock ~48 ~0 ~-5 spruce_fence
-setblock ~48 ~1 ~-5 soul_lantern
+# Jira board area marker (row of bookshelves along north wall)
+fill ~-20 ~0 ~-19 ~20 ~0 ~-19 bookshelf
+fill ~-20 ~1 ~-19 ~20 ~1 ~-19 bookshelf
+
+# Section divider signs (sprint columns)
+setblock ~-15 ~2 ~-19 spruce_wall_sign[facing=south]{front_text:{messages:['{"text":"TO DO"}','{"text":""}','{"text":""}','{"text":""}']}}
+setblock ~-5 ~2 ~-19 spruce_wall_sign[facing=south]{front_text:{messages:['{"text":"IN PROGRESS"}','{"text":""}','{"text":""}','{"text":""}']}}
+setblock ~5 ~2 ~-19 spruce_wall_sign[facing=south]{front_text:{messages:['{"text":"REVIEW"}','{"text":""}','{"text":""}','{"text":""}']}}
+setblock ~15 ~2 ~-19 spruce_wall_sign[facing=south]{front_text:{messages:['{"text":"DONE"}','{"text":""}','{"text":""}','{"text":""}']}}

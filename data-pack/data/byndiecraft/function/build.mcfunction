@@ -5,6 +5,7 @@ say Building Byndiecraft Town... This may take a moment!
 
 function byndiecraft:clear
 function byndiecraft:walls
+function byndiecraft:gate
 function byndiecraft:neighborhood
 function byndiecraft:house1
 function byndiecraft:house2
