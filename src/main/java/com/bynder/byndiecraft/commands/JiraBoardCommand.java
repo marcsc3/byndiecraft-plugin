@@ -64,9 +64,6 @@ public class JiraBoardCommand implements CommandExecutor, TabCompleter {
             case "spawn":
                 return handleSpawn(sender);
 
-            case "spawnflat":
-                return handleSpawnFlat(sender);
-
             case "refresh":
                 return handleRefresh(sender);
 
@@ -181,23 +178,6 @@ public class JiraBoardCommand implements CommandExecutor, TabCompleter {
         return true;
     }
 
-    private boolean handleSpawnFlat(CommandSender sender) {
-        if (!(sender instanceof Player player)) {
-            sender.sendMessage(Component.text("This command can only be used by players!")
-                    .color(NamedTextColor.RED));
-            return true;
-        }
-
-        Location anchor = getAnchorLocation(player);
-        if (anchor == null) {
-            player.sendMessage(Component.text("Using your current location as anchor...")
-                    .color(NamedTextColor.GRAY));
-            anchor = player.getLocation().getBlock().getLocation();
-        }
-
-        boardSpawner.spawnFlat(player, anchor);
-        return true;
-    }
 
     private boolean handleRefresh(CommandSender sender) {
         if (!(sender instanceof Player player)) {
@@ -283,9 +263,7 @@ public class JiraBoardCommand implements CommandExecutor, TabCompleter {
         sender.sendMessage(Component.text("/jiraboard addcolumn <name> <jiraStatus>").color(NamedTextColor.YELLOW)
                 .append(Component.text(" - Add a status column").color(NamedTextColor.GRAY)));
         sender.sendMessage(Component.text("/jiraboard spawn").color(NamedTextColor.YELLOW)
-                .append(Component.text(" - Spawn boards grouped by parent ticket").color(NamedTextColor.GRAY)));
-        sender.sendMessage(Component.text("/jiraboard spawnflat").color(NamedTextColor.YELLOW)
-                .append(Component.text(" - Spawn a single flat board (all tickets together)").color(NamedTextColor.GRAY)));
+                .append(Component.text(" - Spawn the Jira board").color(NamedTextColor.GRAY)));
         sender.sendMessage(Component.text("/jiraboard refresh").color(NamedTextColor.YELLOW)
                 .append(Component.text(" - Rebuild board with fresh Jira data").color(NamedTextColor.GRAY)));
         sender.sendMessage(Component.text("/jiraboard delete").color(NamedTextColor.YELLOW)
@@ -296,7 +274,7 @@ public class JiraBoardCommand implements CommandExecutor, TabCompleter {
     @Override
     public List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command, @NotNull String alias, @NotNull String[] args) {
         if (args.length == 1) {
-            return Arrays.asList("info", "setup", "spawn", "spawnflat", "addcolumn", "refresh", "delete", "help");
+            return Arrays.asList("info", "setup", "spawn", "addcolumn", "refresh", "delete", "help");
         }
 
         if (args.length == 2 && args[0].equalsIgnoreCase("addcolumn")) {
