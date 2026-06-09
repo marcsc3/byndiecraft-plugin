@@ -62,7 +62,7 @@ public class JiraBoardCommand implements CommandExecutor, TabCompleter {
                 return handleDebug(sender);
 
             case "spawn":
-                return handleSpawn(sender);
+                return handleSpawn(sender, args);
 
             case "refresh":
                 return handleRefresh(sender);
@@ -158,17 +158,34 @@ public class JiraBoardCommand implements CommandExecutor, TabCompleter {
         return true;
     }
 
-    private boolean handleSpawn(CommandSender sender) {
+    private boolean handleSpawn(CommandSender sender, String[] args) {
         if (!(sender instanceof Player player)) {
             sender.sendMessage(Component.text("This command can only be used by players!")
                     .color(NamedTextColor.RED));
             return true;
         }
 
-        Location anchor = getAnchorLocation(player);
+        Location anchor = null;
+
+        // /jiraboard spawn <x> <y> <z>
+        if (args.length >= 4) {
+            try {
+                int x = Integer.parseInt(args[1]);
+                int y = Integer.parseInt(args[2]);
+                int z = Integer.parseInt(args[3]);
+                anchor = new Location(player.getWorld(), x, y, z);
+            } catch (NumberFormatException e) {
+                player.sendMessage(Component.text("⚠ Invalid coordinates. Usage: /jiraboard spawn <x> <y> <z>")
+                        .color(NamedTextColor.RED));
+                return true;
+            }
+        }
+
         if (anchor == null) {
-            player.sendMessage(Component.text("⚠ Board anchor not configured! Set board.anchor in config.yml")
-                    .color(NamedTextColor.YELLOW));
+            anchor = getAnchorLocation(player);
+        }
+
+        if (anchor == null) {
             player.sendMessage(Component.text("Using your current location as anchor...")
                     .color(NamedTextColor.GRAY));
             anchor = player.getLocation().getBlock().getLocation();
@@ -262,8 +279,8 @@ public class JiraBoardCommand implements CommandExecutor, TabCompleter {
                 .append(Component.text(" - Setup guide").color(NamedTextColor.GRAY)));
         sender.sendMessage(Component.text("/jiraboard addcolumn <name> <jiraStatus>").color(NamedTextColor.YELLOW)
                 .append(Component.text(" - Add a status column").color(NamedTextColor.GRAY)));
-        sender.sendMessage(Component.text("/jiraboard spawn").color(NamedTextColor.YELLOW)
-                .append(Component.text(" - Spawn the Jira board").color(NamedTextColor.GRAY)));
+        sender.sendMessage(Component.text("/jiraboard spawn [x y z]").color(NamedTextColor.YELLOW)
+                .append(Component.text(" - Spawn the Jira board (optional coords)").color(NamedTextColor.GRAY)));
         sender.sendMessage(Component.text("/jiraboard refresh").color(NamedTextColor.YELLOW)
                 .append(Component.text(" - Rebuild board with fresh Jira data").color(NamedTextColor.GRAY)));
         sender.sendMessage(Component.text("/jiraboard delete").color(NamedTextColor.YELLOW)
