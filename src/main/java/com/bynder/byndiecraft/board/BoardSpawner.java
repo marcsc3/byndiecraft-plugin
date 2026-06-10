@@ -239,14 +239,6 @@ public class BoardSpawner {
         world.getBlockAt(leftPillarX, topY + 1, baseZ).setType(Material.WALL_TORCH);
         world.getBlockAt(rightPillarX, topY + 1, baseZ).setType(Material.WALL_TORCH);
 
-        // Scattered vegetation in front — mix of grass and flowers
-        Random rand = new Random(baseX * 31L + baseZ);
-        Material[] plants = {Material.SHORT_GRASS, Material.SHORT_GRASS, Material.POPPY, Material.DANDELION, Material.CORNFLOWER};
-        for (int x = baseX; x < baseX + totalWidth; x += 2) {
-            if (rand.nextInt(3) > 0) {
-                world.getBlockAt(x, baseY, baseZ + 1).setType(plants[rand.nextInt(plants.length)]);
-            }
-        }
     }
 
     private ItemStack createTicketBook(JiraTicket ticket) {
