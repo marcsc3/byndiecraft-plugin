@@ -36,7 +36,7 @@ cp target/byndiecraft-plugin-1.0.0-SNAPSHOT.jar /path/to/server/plugins/
 
 ## Server Details
 
-- EC2: `ssh -i 'byndiecraft.pem' ubuntu@ec2-18-185-77-208.eu-central-1.compute.amazonaws.com`
+- EC2: `ssh -i 'byndiecraft.pem' ubuntu@<ec2-host>`
 - Minecraft server: `/home/ubuntu/minecraft/`
 - Plugin config: `/home/ubuntu/minecraft/plugins/Byndiecraft/config.yml`
 - MCP server: `/home/ubuntu/minecraft/byndiecraft-plugin/mcp-server/`

@@ -31,7 +31,7 @@ Edit `.env` with your settings:
 # Comment out AWS_PROFILE if running on EC2 with an IAM role
 #AWS_PROFILE=development
 AWS_REGION=eu-central-1
-CLAUDE_SONNET_4_5_MODEL_ID=arn:aws:bedrock:eu-central-1:745091492598:application-inference-profile/ltk3rb6ikzf9
+CLAUDE_SONNET_4_5_MODEL_ID=arn:aws:bedrock:eu-central-1:<account-id>:application-inference-profile/<profile-id>
 GITHUB_DEFAULT_OWNER=bynder
 GITHUB_DEFAULT_REPO=asset-enrichment-agent-svc
 PORT=3000

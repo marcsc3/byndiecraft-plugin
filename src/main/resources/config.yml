@@ -82,7 +82,7 @@ ai:
     region: "eu-central-1"
 
     # Model configuration - using Bynder's Claude Sonnet 4.5 inference profile
-    model_id: "arn:aws:bedrock:eu-central-1:745091492598:application-inference-profile/ltk3rb6ikzf9"
+    model_id: "arn:aws:bedrock:eu-central-1:<account-id>:application-inference-profile/<profile-id>"
     max_tokens: 8000
 
   # GitHub configuration
