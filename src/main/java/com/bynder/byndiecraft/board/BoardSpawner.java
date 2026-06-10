@@ -10,6 +10,7 @@ import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.Sign;
 import org.bukkit.block.sign.Side;
+import org.bukkit.command.CommandSender;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.ItemFrame;
 import org.bukkit.entity.Player;
@@ -41,32 +42,34 @@ public class BoardSpawner {
         this.boardManager = boardManager;
     }
 
-    public void spawn(Player player, Location anchor) {
+    public void spawn(CommandSender sender, Location anchor) {
         String projectKey = plugin.getConfigLoader().getProjectKey();
 
-        player.sendMessage(Component.text("⏳ Fetching tickets from Jira project " + projectKey + "...")
+        sender.sendMessage(Component.text("⏳ Fetching tickets from Jira project " + projectKey + "...")
                 .color(NamedTextColor.GRAY));
 
         jiraClient.searchIssues(projectKey).thenAccept(tickets -> {
             Bukkit.getScheduler().runTask(plugin, () -> {
                 if (tickets.isEmpty()) {
-                    player.sendMessage(Component.text("⚠ No tickets found in project " + projectKey)
+                    sender.sendMessage(Component.text("⚠ No tickets found in project " + projectKey)
                             .color(NamedTextColor.YELLOW));
                     return;
                 }
 
-                player.sendMessage(Component.text("⏳ Building board with " + tickets.size() + " tickets...")
+                sender.sendMessage(Component.text("⏳ Building board with " + tickets.size() + " tickets...")
                         .color(NamedTextColor.GRAY));
 
-                buildBoard(player, anchor, tickets);
+                buildBoard(anchor, tickets);
 
-                player.sendMessage(Component.text("✓ Board spawned with " + tickets.size() + " tickets!")
+                sender.sendMessage(Component.text("✓ Board spawned with " + tickets.size() + " tickets!")
                         .color(NamedTextColor.GREEN));
-                player.playSound(player.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 1.0f, 1.0f);
+                if (sender instanceof Player player) {
+                    player.playSound(player.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 1.0f, 1.0f);
+                }
             });
         }).exceptionally(throwable -> {
             Bukkit.getScheduler().runTask(plugin, () -> {
-                player.sendMessage(Component.text("✗ Error fetching tickets: " + throwable.getMessage())
+                sender.sendMessage(Component.text("✗ Error fetching tickets: " + throwable.getMessage())
                         .color(NamedTextColor.RED));
             });
             return null;
@@ -106,7 +109,7 @@ public class BoardSpawner {
     }
 
 
-    private void buildBoard(Player player, Location anchor, List<JiraTicket> tickets) {
+    private void buildBoard(Location anchor, List<JiraTicket> tickets) {
         World world = anchor.getWorld();
         if (world == null) return;
 

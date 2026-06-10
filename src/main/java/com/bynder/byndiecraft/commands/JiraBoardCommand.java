@@ -166,12 +166,6 @@ public class JiraBoardCommand implements CommandExecutor, TabCompleter {
     }
 
     private boolean handleSpawn(CommandSender sender, String[] args) {
-        if (!(sender instanceof Player player)) {
-            sender.sendMessage(Component.text("This command can only be used by players!")
-                    .color(NamedTextColor.RED));
-            return true;
-        }
-
         Location anchor = null;
 
         // /jiraboard spawn <x> <y> <z>
@@ -180,42 +174,50 @@ public class JiraBoardCommand implements CommandExecutor, TabCompleter {
                 int x = Integer.parseInt(args[1]);
                 int y = Integer.parseInt(args[2]);
                 int z = Integer.parseInt(args[3]);
-                anchor = new Location(player.getWorld(), x, y, z);
+                World world = (sender instanceof Player player) ? player.getWorld() : Bukkit.getWorlds().get(0);
+                anchor = new Location(world, x, y, z);
             } catch (NumberFormatException e) {
-                player.sendMessage(Component.text("⚠ Invalid coordinates. Usage: /jiraboard spawn <x> <y> <z>")
+                sender.sendMessage(Component.text("⚠ Invalid coordinates. Usage: /jiraboard spawn <x> <y> <z>")
                         .color(NamedTextColor.RED));
                 return true;
             }
         }
 
         if (anchor == null) {
-            anchor = getAnchorLocation(player);
+            anchor = getAnchorFromConfig();
         }
 
         if (anchor == null) {
-            player.sendMessage(Component.text("Using your current location as anchor...")
-                    .color(NamedTextColor.GRAY));
-            anchor = player.getLocation().getBlock().getLocation();
+            if (sender instanceof Player player) {
+                sender.sendMessage(Component.text("Using your current location as anchor...")
+                        .color(NamedTextColor.GRAY));
+                anchor = player.getLocation().getBlock().getLocation();
+            } else {
+                sender.sendMessage(Component.text("⚠ No coordinates provided. Usage: /jiraboard spawn <x> <y> <z>")
+                        .color(NamedTextColor.RED));
+                return true;
+            }
         }
 
-        boardSpawner.spawn(player, anchor);
+        boardSpawner.spawn(sender, anchor);
         return true;
     }
 
 
     private boolean handleRefresh(CommandSender sender) {
-        if (!(sender instanceof Player player)) {
-            sender.sendMessage(Component.text("This command can only be used by players!")
-                    .color(NamedTextColor.RED));
-            return true;
-        }
+        Location anchor = getAnchorFromConfig();
 
-        Location anchor = getAnchorLocation(player);
         if (anchor == null) {
-            anchor = player.getLocation().getBlock().getLocation();
+            if (sender instanceof Player player) {
+                anchor = player.getLocation().getBlock().getLocation();
+            } else {
+                sender.sendMessage(Component.text("⚠ No anchor configured. Set board.anchor in config.yml")
+                        .color(NamedTextColor.RED));
+                return true;
+            }
         }
 
-        boardSpawner.spawn(player, anchor);
+        boardSpawner.spawn(sender, anchor);
         return true;
     }
 
@@ -226,7 +228,7 @@ public class JiraBoardCommand implements CommandExecutor, TabCompleter {
             return true;
         }
 
-        Location configAnchor = getAnchorLocation(player);
+        Location configAnchor = getAnchorFromConfig();
         final Location anchor = configAnchor != null ? configAnchor : player.getLocation().getBlock().getLocation();
 
         World world = anchor.getWorld();
@@ -263,7 +265,7 @@ public class JiraBoardCommand implements CommandExecutor, TabCompleter {
         return true;
     }
 
-    private Location getAnchorLocation(Player player) {
+    private Location getAnchorFromConfig() {
         var config = plugin.getConfig();
         if (config.contains("board.anchor")) {
             String worldName = config.getString("board.world", "world");
