@@ -24,15 +24,15 @@ public class BoardSpawner {
     private final JiraClient jiraClient;
     private final BoardManager boardManager;
 
-    private static final int MAX_HEIGHT = 3; // 3 rows tall — visible in survival without looking up
-    private static final int SEPARATOR_WIDTH = 1; // 1 empty block between columns
+    private static final int MAX_HEIGHT = 4;
+    private static final int SEPARATOR_WIDTH = 1;
 
     private static final Material[] COLUMN_COLORS = {
-            Material.WHITE_CONCRETE,
-            Material.LIGHT_BLUE_CONCRETE,
-            Material.YELLOW_CONCRETE,
-            Material.PURPLE_CONCRETE,
-            Material.LIME_CONCRETE
+            Material.WHITE_TERRACOTTA,
+            Material.LIGHT_BLUE_TERRACOTTA,
+            Material.YELLOW_TERRACOTTA,
+            Material.PURPLE_TERRACOTTA,
+            Material.LIME_TERRACOTTA
     };
 
     public BoardSpawner(ByndiecraftPlugin plugin, JiraClient jiraClient, BoardManager boardManager) {
@@ -119,11 +119,12 @@ public class BoardSpawner {
 
         List<StatusColumn> columns = boardManager.getBoard().getColumns();
 
-        // Calculate width needed per column: ceil(ticketCount / MAX_HEIGHT) blocks wide, minimum 2
+        // Calculate width needed per column: ceil(ticketCount / MAX_HEIGHT) + 1 extra for empty slots
         int[] columnWidths = new int[columns.size()];
         for (int i = 0; i < columns.size(); i++) {
             int count = ticketsByStatus.getOrDefault(columns.get(i).getJiraStatusName().toLowerCase(), Collections.emptyList()).size();
-            columnWidths[i] = Math.max(2, (count + MAX_HEIGHT - 1) / MAX_HEIGHT);
+            int neededWidth = (count + MAX_HEIGHT - 1) / MAX_HEIGHT;
+            columnWidths[i] = Math.max(2, neededWidth + 1);
         }
 
         // Total board width
@@ -139,14 +140,7 @@ public class BoardSpawner {
         int baseZ = anchor.getBlockZ();
 
         clearBoard(new Location(world, baseX, baseY, baseZ), totalWidth);
-        int topY = baseY + MAX_HEIGHT;
-
-        // Floor base — dark oak slab platform
-        for (int x = baseX - 1; x <= baseX + totalWidth; x++) {
-            world.getBlockAt(x, baseY - 1, baseZ).setType(Material.DARK_OAK_SLAB);
-            world.getBlockAt(x, baseY - 1, baseZ - 1).setType(Material.DARK_OAK_SLAB);
-            world.getBlockAt(x, baseY - 1, baseZ + 1).setType(Material.DARK_OAK_SLAB);
-        }
+        int topY = baseY + MAX_HEIGHT - 1; // 4 rows: baseY, baseY+1, baseY+2, baseY+3
 
         int currentX = baseX;
 
@@ -157,7 +151,7 @@ public class BoardSpawner {
             List<JiraTicket> columnTickets = ticketsByStatus.getOrDefault(column.getJiraStatusName().toLowerCase(), Collections.emptyList());
             int ticketCount = columnTickets.size();
 
-            // Backing wall — colored concrete, fixed height
+            // Backing wall — terracotta, fixed height
             Material wallMaterial = COLUMN_COLORS[colIdx % COLUMN_COLORS.length];
             for (int y = baseY; y <= topY; y++) {
                 for (int dx = 0; dx < colWidth; dx++) {
@@ -209,36 +203,51 @@ public class BoardSpawner {
 
             currentX += colWidth;
 
-            // Separator pillar between columns
+            // Separator: stripped oak log pillar between columns
             if (colIdx < columns.size() - 1) {
                 for (int y = baseY; y <= topY; y++) {
-                    world.getBlockAt(currentX, y, baseZ - 1).setType(Material.DARK_OAK_LOG);
+                    world.getBlockAt(currentX, y, baseZ - 1).setType(Material.STRIPPED_OAK_LOG);
                 }
-                // Lantern on the pillar
-                world.getBlockAt(currentX, baseY + 1, baseZ).setType(Material.LANTERN);
+                // Chain + lantern hanging from top
+                world.getBlockAt(currentX, topY + 1, baseZ - 1).setType(Material.STRIPPED_OAK_LOG);
+                world.getBlockAt(currentX, topY, baseZ).setType(Material.CHAIN);
+                world.getBlockAt(currentX, topY - 1, baseZ).setType(Material.LANTERN);
                 currentX += SEPARATOR_WIDTH;
             }
         }
 
-        // Top roof trim — spruce slab across the top
+        // Cobblestone wall base — runs along the bottom, feels like a foundation
         for (int x = baseX - 1; x <= baseX + totalWidth; x++) {
-            world.getBlockAt(x, topY + 2, baseZ - 1).setType(Material.SPRUCE_SLAB);
+            world.getBlockAt(x, baseY - 1, baseZ - 1).setType(Material.COBBLESTONE_WALL);
         }
 
-        // Corner pillars with soul lanterns
+        // Overhang roof — stair blocks facing outward for a natural eave
+        for (int x = baseX; x < baseX + totalWidth; x++) {
+            Block stair = world.getBlockAt(x, topY + 1, baseZ - 1);
+            stair.setType(Material.DARK_OAK_STAIRS);
+            org.bukkit.block.data.type.Stairs stairData = (org.bukkit.block.data.type.Stairs) stair.getBlockData();
+            stairData.setFacing(BlockFace.SOUTH);
+            stairData.setHalf(org.bukkit.block.data.Bisected.Half.TOP);
+            stair.setBlockData(stairData);
+        }
+
+        // End pillars — stone brick columns with torches
         int leftPillarX = baseX - 1;
         int rightPillarX = baseX + totalWidth;
-        for (int y = baseY; y <= topY + 2; y++) {
-            world.getBlockAt(leftPillarX, y, baseZ - 1).setType(Material.DARK_OAK_LOG);
-            world.getBlockAt(rightPillarX, y, baseZ - 1).setType(Material.DARK_OAK_LOG);
+        for (int y = baseY; y <= topY + 1; y++) {
+            world.getBlockAt(leftPillarX, y, baseZ - 1).setType(Material.STONE_BRICKS);
+            world.getBlockAt(rightPillarX, y, baseZ - 1).setType(Material.STONE_BRICKS);
         }
-        world.getBlockAt(leftPillarX, topY + 2, baseZ).setType(Material.SOUL_LANTERN);
-        world.getBlockAt(rightPillarX, topY + 2, baseZ).setType(Material.SOUL_LANTERN);
+        world.getBlockAt(leftPillarX, topY + 1, baseZ).setType(Material.WALL_TORCH);
+        world.getBlockAt(rightPillarX, topY + 1, baseZ).setType(Material.WALL_TORCH);
 
-        // Flower pots along the base
-        for (int x = baseX; x < baseX + totalWidth; x += 3) {
-            Block pot = world.getBlockAt(x, baseY, baseZ + 1);
-            pot.setType(Material.POTTED_FERN);
+        // Scattered vegetation in front — mix of grass and flowers
+        Random rand = new Random(baseX * 31L + baseZ);
+        Material[] plants = {Material.SHORT_GRASS, Material.SHORT_GRASS, Material.POPPY, Material.DANDELION, Material.CORNFLOWER};
+        for (int x = baseX; x < baseX + totalWidth; x += 2) {
+            if (rand.nextInt(3) > 0) {
+                world.getBlockAt(x, baseY, baseZ + 1).setType(plants[rand.nextInt(plants.length)]);
+            }
         }
     }
 
