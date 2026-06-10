@@ -1,71 +1,183 @@
-# House 3 - Igor's house
-# Position: ~-12 ~0 ~33, door faces SOUTH (toward courtyard)
+# House 3 - Igor's Temple
+# Position: center ~-12 ~0 ~33, door faces SOUTH (toward courtyard)
 # Banner: Green
 
-# Foundation (13x13 polished deepslate)
-fill ~-18 ~-1 ~27 ~-6 ~-1 ~39 polished_deepslate
-fill ~-18 ~0 ~27 ~-6 ~0 ~39 polished_deepslate
+# Foundation (15x15 polished deepslate)
+fill ~-19 ~-1 ~26 ~-5 ~-1 ~40 polished_deepslate
 
-# Walls (spruce planks, 4 high)
-fill ~-18 ~1 ~27 ~-6 ~4 ~27 spruce_planks
-fill ~-18 ~1 ~39 ~-6 ~4 ~39 spruce_planks
-fill ~-18 ~1 ~27 ~-18 ~4 ~39 spruce_planks
-fill ~-6 ~1 ~27 ~-6 ~4 ~39 spruce_planks
+# Platform floor (15x15 bamboo planks)
+fill ~-19 ~0 ~26 ~-5 ~0 ~40 bamboo_planks
+
+# Tatami interior floor (9x9 bamboo mosaic)
+fill ~-16 ~0 ~29 ~-8 ~0 ~37 bamboo_mosaic
+
+# Wall line border (11x11 dark oak frame)
+fill ~-17 ~0 ~28 ~-7 ~0 ~28 dark_oak_planks
+fill ~-17 ~0 ~38 ~-7 ~0 ~38 dark_oak_planks
+fill ~-17 ~0 ~28 ~-17 ~0 ~38 dark_oak_planks
+fill ~-7 ~0 ~28 ~-7 ~0 ~38 dark_oak_planks
+
+# Entrance steps (3-wide, south side, 1 block out from platform)
+setblock ~-13 ~0 ~41 bamboo_stairs[facing=north,half=bottom]
+setblock ~-12 ~0 ~41 bamboo_stairs[facing=north,half=bottom]
+setblock ~-11 ~0 ~41 bamboo_stairs[facing=north,half=bottom]
+
+# Corner posts (dark oak log, 4 high)
+fill ~-17 ~1 ~28 ~-17 ~4 ~28 dark_oak_log
+fill ~-7 ~1 ~28 ~-7 ~4 ~28 dark_oak_log
+fill ~-17 ~1 ~38 ~-17 ~4 ~38 dark_oak_log
+fill ~-7 ~1 ~38 ~-7 ~4 ~38 dark_oak_log
+
+# Mid-wall posts
+# South wall (front)
+fill ~-14 ~1 ~38 ~-14 ~4 ~38 dark_oak_log
+fill ~-10 ~1 ~38 ~-10 ~4 ~38 dark_oak_log
+# North wall (back)
+fill ~-14 ~1 ~28 ~-14 ~4 ~28 dark_oak_log
+fill ~-10 ~1 ~28 ~-10 ~4 ~28 dark_oak_log
+# West wall
+fill ~-17 ~1 ~31 ~-17 ~4 ~31 dark_oak_log
+fill ~-17 ~1 ~35 ~-17 ~4 ~35 dark_oak_log
+# East wall
+fill ~-7 ~1 ~31 ~-7 ~4 ~31 dark_oak_log
+fill ~-7 ~1 ~35 ~-7 ~4 ~35 dark_oak_log
+
+# Top beam at Y+4
+fill ~-17 ~4 ~28 ~-7 ~4 ~28 dark_oak_planks
+fill ~-17 ~4 ~38 ~-7 ~4 ~38 dark_oak_planks
+fill ~-17 ~4 ~28 ~-17 ~4 ~38 dark_oak_planks
+fill ~-7 ~4 ~28 ~-7 ~4 ~38 dark_oak_planks
+
+# Mid beam at Y+2
+fill ~-17 ~2 ~28 ~-7 ~2 ~28 dark_oak_planks
+fill ~-17 ~2 ~38 ~-7 ~2 ~38 dark_oak_planks
+fill ~-17 ~2 ~28 ~-17 ~2 ~38 dark_oak_planks
+fill ~-7 ~2 ~28 ~-7 ~2 ~38 dark_oak_planks
+
+# Shoji panels (bamboo mosaic Y+1 and Y+3)
+# South wall Y+1
+fill ~-16 ~1 ~38 ~-15 ~1 ~38 bamboo_mosaic
+fill ~-13 ~1 ~38 ~-11 ~1 ~38 bamboo_mosaic
+fill ~-9 ~1 ~38 ~-8 ~1 ~38 bamboo_mosaic
+# South wall Y+3
+fill ~-16 ~3 ~38 ~-15 ~3 ~38 bamboo_mosaic
+fill ~-13 ~3 ~38 ~-11 ~3 ~38 bamboo_mosaic
+fill ~-9 ~3 ~38 ~-8 ~3 ~38 bamboo_mosaic
+# North wall Y+1
+fill ~-16 ~1 ~28 ~-15 ~1 ~28 bamboo_mosaic
+fill ~-13 ~1 ~28 ~-11 ~1 ~28 bamboo_mosaic
+fill ~-9 ~1 ~28 ~-8 ~1 ~28 bamboo_mosaic
+# North wall Y+3
+fill ~-16 ~3 ~28 ~-15 ~3 ~28 bamboo_mosaic
+fill ~-13 ~3 ~28 ~-11 ~3 ~28 bamboo_mosaic
+fill ~-9 ~3 ~28 ~-8 ~3 ~28 bamboo_mosaic
+# West wall Y+1
+fill ~-17 ~1 ~29 ~-17 ~1 ~30 bamboo_mosaic
+fill ~-17 ~1 ~32 ~-17 ~1 ~34 bamboo_mosaic
+fill ~-17 ~1 ~36 ~-17 ~1 ~37 bamboo_mosaic
+# West wall Y+3
+fill ~-17 ~3 ~29 ~-17 ~3 ~30 bamboo_mosaic
+fill ~-17 ~3 ~32 ~-17 ~3 ~34 bamboo_mosaic
+fill ~-17 ~3 ~36 ~-17 ~3 ~37 bamboo_mosaic
+# East wall Y+1
+fill ~-7 ~1 ~29 ~-7 ~1 ~30 bamboo_mosaic
+fill ~-7 ~1 ~32 ~-7 ~1 ~34 bamboo_mosaic
+fill ~-7 ~1 ~36 ~-7 ~1 ~37 bamboo_mosaic
+# East wall Y+3
+fill ~-7 ~3 ~29 ~-7 ~3 ~30 bamboo_mosaic
+fill ~-7 ~3 ~32 ~-7 ~3 ~34 bamboo_mosaic
+fill ~-7 ~3 ~36 ~-7 ~3 ~37 bamboo_mosaic
+
+# Window lattice
+setblock ~-16 ~3 ~38 bamboo_trapdoor[facing=north,half=top,open=true]
+setblock ~-8 ~3 ~38 bamboo_trapdoor[facing=north,half=top,open=true]
+setblock ~-17 ~3 ~33 bamboo_trapdoor[facing=east,half=top,open=true]
+setblock ~-7 ~3 ~33 bamboo_trapdoor[facing=west,half=top,open=true]
+setblock ~-16 ~3 ~28 bamboo_trapdoor[facing=south,half=top,open=true]
+setblock ~-8 ~3 ~28 bamboo_trapdoor[facing=south,half=top,open=true]
 
 # Interior air
-fill ~-17 ~1 ~28 ~-7 ~4 ~38 air
+fill ~-16 ~1 ~29 ~-8 ~4 ~37 air
 
-# Door (south-facing, center of south wall)
-setblock ~-12 ~1 ~39 spruce_door[facing=north,half=lower,hinge=left]
-setblock ~-12 ~2 ~39 spruce_door[facing=north,half=upper,hinge=left]
+# Door (bamboo, south-facing)
+setblock ~-12 ~1 ~38 bamboo_door[facing=north,half=lower,hinge=left]
+setblock ~-12 ~2 ~38 bamboo_door[facing=north,half=upper,hinge=left]
 
-# Windows (spruce fence)
-setblock ~-15 ~2 ~39 spruce_fence
-setblock ~-15 ~3 ~39 spruce_fence
-setblock ~-9 ~2 ~39 spruce_fence
-setblock ~-9 ~3 ~39 spruce_fence
-setblock ~-18 ~2 ~33 spruce_fence
-setblock ~-18 ~3 ~33 spruce_fence
-setblock ~-6 ~2 ~33 spruce_fence
-setblock ~-6 ~3 ~33 spruce_fence
-setblock ~-12 ~2 ~27 spruce_fence
-setblock ~-12 ~3 ~27 spruce_fence
+# Veranda railing (3 sides, gap at south entrance)
+fill ~-19 ~1 ~40 ~-14 ~1 ~40 bamboo_fence
+fill ~-10 ~1 ~40 ~-5 ~1 ~40 bamboo_fence
+fill ~-19 ~1 ~26 ~-5 ~1 ~26 bamboo_fence
+fill ~-19 ~1 ~26 ~-19 ~1 ~40 bamboo_fence
+fill ~-5 ~1 ~26 ~-5 ~1 ~40 bamboo_fence
 
-# Roof - tier 1 (dark oak stairs, overhanging by 1)
-fill ~-19 ~5 ~26 ~-5 ~5 ~40 dark_oak_slab
-fill ~-19 ~5 ~26 ~-5 ~5 ~26 dark_oak_stairs[facing=south,half=bottom]
-fill ~-19 ~5 ~40 ~-5 ~5 ~40 dark_oak_stairs[facing=north,half=bottom]
-fill ~-19 ~5 ~27 ~-19 ~5 ~39 dark_oak_stairs[facing=east,half=bottom]
-fill ~-5 ~5 ~27 ~-5 ~5 ~39 dark_oak_stairs[facing=west,half=bottom]
+# Roof Tier 1 (17x17 at Y+5)
+fill ~-20 ~5 ~25 ~-4 ~5 ~41 deepslate_tile_slab
+fill ~-20 ~5 ~25 ~-4 ~5 ~25 deepslate_tile_stairs[facing=south,half=bottom]
+fill ~-20 ~5 ~41 ~-4 ~5 ~41 deepslate_tile_stairs[facing=north,half=bottom]
+fill ~-20 ~5 ~26 ~-20 ~5 ~40 deepslate_tile_stairs[facing=east,half=bottom]
+fill ~-4 ~5 ~26 ~-4 ~5 ~40 deepslate_tile_stairs[facing=west,half=bottom]
+# Corner upswept
+setblock ~-20 ~6 ~25 deepslate_tile_stairs[facing=south,half=bottom]
+setblock ~-4 ~6 ~25 deepslate_tile_stairs[facing=south,half=bottom]
+setblock ~-20 ~6 ~41 deepslate_tile_stairs[facing=north,half=bottom]
+setblock ~-4 ~6 ~41 deepslate_tile_stairs[facing=north,half=bottom]
 
-# Roof - tier 2 (narrower)
-fill ~-17 ~6 ~28 ~-7 ~6 ~38 dark_oak_slab
-fill ~-17 ~6 ~28 ~-7 ~6 ~28 dark_oak_stairs[facing=south,half=bottom]
-fill ~-17 ~6 ~38 ~-7 ~6 ~38 dark_oak_stairs[facing=north,half=bottom]
-fill ~-17 ~6 ~29 ~-17 ~6 ~37 dark_oak_stairs[facing=east,half=bottom]
-fill ~-7 ~6 ~29 ~-7 ~6 ~37 dark_oak_stairs[facing=west,half=bottom]
+# Attic fill (9x9 dark oak)
+fill ~-16 ~6 ~29 ~-8 ~6 ~37 dark_oak_planks
 
-# Roof peak
-fill ~-15 ~7 ~30 ~-9 ~7 ~36 dark_oak_planks
-setblock ~-12 ~8 ~33 amethyst_block
-setblock ~-12 ~9 ~33 amethyst_cluster[facing=up]
+# Roof Tier 2 (13x13 at Y+7)
+fill ~-18 ~7 ~27 ~-6 ~7 ~39 deepslate_tile_slab
+fill ~-18 ~7 ~27 ~-6 ~7 ~27 deepslate_tile_stairs[facing=south,half=bottom]
+fill ~-18 ~7 ~39 ~-6 ~7 ~39 deepslate_tile_stairs[facing=north,half=bottom]
+fill ~-18 ~7 ~28 ~-18 ~7 ~38 deepslate_tile_stairs[facing=east,half=bottom]
+fill ~-6 ~7 ~28 ~-6 ~7 ~38 deepslate_tile_stairs[facing=west,half=bottom]
+# Tier 2 corner upswept
+setblock ~-18 ~8 ~27 deepslate_tile_stairs[facing=south,half=bottom]
+setblock ~-6 ~8 ~27 deepslate_tile_stairs[facing=south,half=bottom]
+setblock ~-18 ~8 ~39 deepslate_tile_stairs[facing=north,half=bottom]
+setblock ~-6 ~8 ~39 deepslate_tile_stairs[facing=north,half=bottom]
 
-# Interior: bed, chest, crafting table, lantern
-setblock ~-16 ~1 ~28 green_bed[facing=south,part=head]
-setblock ~-16 ~1 ~29 green_bed[facing=south,part=foot]
-setblock ~-8 ~1 ~28 chest[facing=south]
-setblock ~-8 ~1 ~30 crafting_table
+# Roof finial
+setblock ~-12 ~8 ~33 gold_block
+setblock ~-12 ~9 ~33 lightning_rod
+
+# Interior furnishings
+setblock ~-15 ~1 ~29 green_bed[facing=south,part=head]
+setblock ~-15 ~1 ~30 green_bed[facing=south,part=foot]
+setblock ~-9 ~1 ~29 chest[facing=south]
+setblock ~-9 ~1 ~31 crafting_table
 setblock ~-12 ~4 ~33 soul_lantern
+setblock ~-14 ~1 ~31 potted_cherry_sapling
 
-# Floor (spruce planks inside)
-fill ~-17 ~0 ~28 ~-7 ~0 ~38 spruce_planks
+# Mini torii gate (1 block beyond platform, south side)
+fill ~-14 ~0 ~42 ~-14 ~3 ~42 red_concrete
+fill ~-10 ~0 ~42 ~-10 ~3 ~42 red_concrete
+fill ~-15 ~4 ~42 ~-9 ~4 ~42 red_concrete
+fill ~-15 ~5 ~42 ~-9 ~5 ~42 dark_oak_slab
+
+# Stone lanterns
+setblock ~-16 ~0 ~41 stone_brick_wall
+setblock ~-16 ~1 ~41 smooth_stone_slab[type=double]
+setblock ~-16 ~2 ~41 lantern
+setblock ~-8 ~0 ~41 stone_brick_wall
+setblock ~-8 ~1 ~41 smooth_stone_slab[type=double]
+setblock ~-8 ~2 ~41 lantern
+
+# Cherry blossom tree (back-left veranda corner)
+fill ~-18 ~1 ~27 ~-18 ~3 ~27 cherry_log
+fill ~-19 ~4 ~26 ~-17 ~4 ~28 cherry_leaves
+fill ~-18 ~5 ~26 ~-18 ~5 ~28 cherry_leaves
+setblock ~-18 ~5 ~27 cherry_leaves
+setblock ~-19 ~1 ~28 pink_petals
+setblock ~-17 ~1 ~26 pink_petals
+
+# Bamboo cluster (back-right veranda corner)
+fill ~-6 ~1 ~27 ~-6 ~4 ~27 bamboo_block
+fill ~-5 ~1 ~27 ~-5 ~3 ~27 bamboo_block
+fill ~-6 ~1 ~26 ~-6 ~3 ~26 bamboo_block
 
 # Banner (green, beside door on south face)
-setblock ~-11 ~3 ~39 green_wall_banner[facing=north]
+setblock ~-11 ~3 ~38 green_wall_banner[facing=north]
 
 # Name sign
-setblock ~-13 ~3 ~39 spruce_wall_sign[facing=north]{front_text:{messages:['{"text":"Igor"}','{"text":""}','{"text":""}','{"text":""}']}}
-
-# Soul lanterns at entrance
-setblock ~-14 ~3 ~40 soul_lantern
-setblock ~-10 ~3 ~40 soul_lantern
+setblock ~-13 ~3 ~38 bamboo_wall_sign[facing=north]{front_text:{messages:['{"text":"Igor"}','{"text":""}','{"text":""}','{"text":""}']}}
