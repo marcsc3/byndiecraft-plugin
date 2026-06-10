@@ -1,204 +1,152 @@
-# Byndiecraft - Minecraft Jira Integration
+# Byndiecraft
 
-> **Bynder Hackathon 2026**: A physical Jira board inside Minecraft with AI-powered ticket implementation.
+**Your Jira board lives inside Minecraft. Move a book, move a ticket. Throw a book, and AI writes the code.**
 
-## Overview
+---
 
-Byndiecraft turns Minecraft into a living Jira board. Tickets appear as colored books in item frames, organized by status columns. Move a book between columns and the Jira ticket transitions automatically. Throw a book into the AI Hopper and Claude implements the ticket, creating a PR on GitHub.
+## What is this?
 
-### Features
+Byndiecraft transforms Minecraft into a fully functional Jira board. Tickets from your active sprint appear as colored books sitting in item frames on a physical board. Pick up a book and place it in a different column — the Jira ticket transitions instantly. Want a ticket implemented? Throw the book into the AI Hopper and Claude writes the code, pushes a branch, and opens a Pull Request on GitHub. All without leaving Minecraft.
 
-**Phase 1 - Jira Board**
-- `/jiraboard spawn [x y z]` builds a complete board from live Jira data (active sprint)
-- Books are color-coded: red (bugs), green (stories), aqua (tasks/subtasks), gold (spikes)
-- Book titles show ticket key + summary; pages contain description (multi-page)
-- Moving books between columns triggers Jira status transitions via REST API
-- Fireworks launch when a ticket moves to "Done"
-- Duplicate transitions are skipped (rotating a book in its frame doesn't re-fire)
-- Works from command blocks (no player required if coordinates provided)
-- Board auto-sizes columns based on ticket count
+---
 
-**Phase 2 - AI Implementation**
-- Throw a book into the AI Hopper to trigger automated ticket implementation
-- MCP server calls AWS Bedrock (Claude) to determine the target repository
-- Claude analyzes the ticket and generates an implementation
-- A Pull Request is created automatically on GitHub
-- PR link is returned to the player in Minecraft
+## How It Works
+
+### Phase 1: The Living Jira Board
+
+A single command (`/jiraboard spawn`) connects to Jira's REST API v3, runs a JQL query against the active sprint, and builds a physical board in the Minecraft world.
+
+**Board Generation:**
+- The plugin authenticates with Jira using email + API token (Basic Auth over HTTPS)
+- Fetches all tickets in the active sprint via JQL: `sprint in openSprints() AND project = <KEY>`
+- For each ticket, generates a written book — title = ticket key + summary, pages = full description (multi-page support)
+- Books are **color-coded** by issue type: red = bug, green = story, aqua = task/subtask, gold = spike
+- Places books in item frames on colored terracotta columns (one column per status)
+- Columns auto-size their width based on ticket count (max 4 rows per column)
+
+**Real-Time Jira Sync (the core mechanic):**
+- `ItemFrameListener` hooks into Paper's `PlayerInteractEntityEvent`
+- When a player places a book in a frame, the plugin extracts the ticket key via regex (`[A-Z]+-\d+`)
+- The frame's world coordinates are mapped to a status column via `BoardManager` (frame location → column lookup)
+- The plugin calls `GET /rest/api/3/issue/{key}/transitions` to fetch available Jira transitions
+- Matches the target column's Jira status name against available transitions
+- Fires `POST /rest/api/3/issue/{key}/transitions` with the matched transition ID
+- All HTTP calls use **OkHttp with CompletableFuture** — fully async, zero server tick lag
+- Duplicate transitions are prevented: the plugin caches current ticket status and skips if the book is just being rotated in place
+- On success: chat confirmation + sound effect. On "Done"/"Closed": fireworks with configurable colors, trails, and effects
+
+**Columns → Jira Status Mapping (configurable in YAML):**
+```
+Ready to be Picked Up  →  Backlog
+In Progress            →  In Progress
+Review                 →  Code Review
+Merge                  →  Merge
+Done                   →  Closed
+```
+
+### Phase 2: AI-Powered Implementation
+
+Place a hopper block in the world and mark it as the AI Hopper. Then:
+
+1. Write (or pick up) a book with a Jira ticket key
+2. Throw it into the AI Hopper
+3. The plugin sends the ticket details to an MCP server
+4. Claude (via AWS Bedrock) analyzes the ticket and determines the correct repository
+5. Claude generates the implementation
+6. A feature branch is created, code is committed, and a **Pull Request appears on GitHub**
+7. The PR link is sent back to you in Minecraft chat
+
+Elevator music plays while you wait.
+
+---
 
 ## Architecture
 
 ```
-Minecraft Server (Paper 1.21 / Java 25)
-├── BoardSpawner ─────── Builds board: terracotta walls, item frames, signed books
-├── ItemFrameListener ── Detects book movements → Jira transition API
-├── AIChestListener ──── Detects books in AI Hopper → MCP Server
-└── JiraBoardCommand ─── /jiraboard spawn|refresh|delete|setaihopper
-         │                         │
-         ▼                         ▼
-    Jira REST API v3          MCP Server (Node.js, port 3000)
-    (JQL search,              ├── Claude/Bedrock → determine repo
-     transitions)             ├── Claude/Bedrock → implement ticket
-                              └── gh CLI → create PR on GitHub
+┌──────────────────────────────────────────────────────────────────────┐
+│                         MINECRAFT SERVER                              │
+│                        (Paper 1.21 / Java)                           │
+│                                                                      │
+│   /jiraboard spawn         Move book between frames                  │
+│         │                          │                                 │
+│         ▼                          ▼                                 │
+│   BoardSpawner              ItemFrameListener                        │
+│   (build board from         (detect movement,                        │
+│    live Jira data)           extract ticket key)                     │
+│         │                          │                                 │
+│         │         ┌────────────────┼────────────────┐                │
+│         ▼         ▼                ▼                ▼                │
+│    ┌─────────────────┐    ┌─────────────────┐  ┌────────────┐       │
+│    │  Jira REST API  │    │  Jira REST API  │  │ AI Hopper  │       │
+│    │  (fetch sprint) │    │  (transition)   │  │ (throw book)│      │
+│    └─────────────────┘    └─────────────────┘  └─────┬──────┘       │
+│                                                      │               │
+└──────────────────────────────────────────────────────┼───────────────┘
+                                                       │
+                                                       ▼
+                                            ┌─────────────────────┐
+                                            │   MCP Server (Node)  │
+                                            │                     │
+                                            │  Claude / Bedrock   │
+                                            │  (analyze ticket,   │
+                                            │   generate code)    │
+                                            │         │           │
+                                            │         ▼           │
+                                            │   GitHub CLI (gh)   │
+                                            │   (create PR)       │
+                                            └─────────────────────┘
 ```
 
-## Quick Start
+---
 
-### Prerequisites
+## Tech Stack
 
-- Java 25 + Maven
-- Paper server 1.21 (paper-26.1.2)
-- Node.js 18+ (for MCP server)
-- GitHub CLI (`gh`)
-- AWS credentials with Bedrock access (or EC2 IAM role)
+| Layer | Technology | Why |
+|-------|-----------|-----|
+| Minecraft Server | Paper 1.21 | Modern Minecraft server with plugin API |
+| Plugin | Java 21 | Event-driven listeners, async HTTP via OkHttp |
+| Jira Integration | REST API v3 + OAuth | Real-time ticket search and transitions |
+| AI Orchestration | Node.js + Express | Lightweight MCP server bridging Minecraft to Claude |
+| Code Generation | Claude Sonnet 4.5 (AWS Bedrock) | Analyzes tickets and generates implementations |
+| PR Creation | GitHub CLI | Branches, commits, and opens PRs automatically |
+| World Design | Minecraft Datapack | Feudal Japanese town built with mcfunction files |
 
-### 1. Build the Plugin
+---
 
-```bash
-mvn clean package
-cp target/byndiecraft-plugin-1.0.0-SNAPSHOT.jar /path/to/server/plugins/
-```
+## The World
 
-### 2. Configure Jira Credentials
+The board lives inside a custom-built feudal Japanese town — a ceremonial plaza surrounded by houses, walking paths, and a five-tier pagoda (the "GitHub Tower"). The entire world is generated from a datapack with 17 mcfunction files. It's not just a board floating in space; it's a place your team gathers for standup.
 
-Create `plugins/Byndiecraft/credentials.yml`:
-```yaml
-jira:
-  email: "your-email@bynder.com"
-  api_token: "your-api-token"
-```
+Run `/standup` and all online players teleport to the board in a semicircle, ready to discuss the sprint.
 
-### 3. Configure the Plugin
+---
 
-Edit `plugins/Byndiecraft/config.yml`:
-```yaml
-jira:
-  url: "https://bynder.atlassian.net"
-  project_key: "SHARE"
+## Key Commands
 
-board:
-  world: "world"
-  anchor:
-    x: 0
-    y: -59
-    z: -15
-  columns:
-    - name: "Ready to be Picked Up"
-      jira_status_name: "Backlog"
-      frames: []
-    - name: "In Progress"
-      jira_status_name: "In Progress"
-      frames: []
-    - name: "Review"
-      jira_status_name: "Code review"
-      frames: []
-    - name: "Merge"
-      jira_status_name: "Merge"
-      frames: []
-    - name: "Done"
-      jira_status_name: "Closed"
-      frames: []
-
-fireworks:
-  enabled: true
-  power: 1
-  type: BALL_LARGE
-  colors: ["#FF0000", "#FFD700", "#00FF00"]
-  fade_colors: ["#FFFFFF"]
-  trail: true
-  flicker: true
-
-ai:
-  enabled: true
-  mcp_endpoint: "http://localhost:3000/implement-ticket"
-
-debug: true
-```
-
-### 4. Setup MCP Server (Phase 2)
-
-```bash
-cd mcp-server
-npm install
-cp .env.example .env
-# Edit .env — see mcp-server/README.md for details
-gh auth login
-gh auth setup-git
-npm start
-```
-
-### 5. Restart Minecraft Server
-
-## Commands
-
-| Command | Description |
+| Command | What it does |
 |---------|-------------|
-| `/jiraboard spawn [x y z]` | Spawn the board (optional coordinates) |
-| `/jiraboard refresh` | Rebuild board with fresh Jira data |
-| `/jiraboard delete` | Destroy the board with TNT |
-| `/jiraboard setaihopper` | Set the AI Hopper location (look at a hopper) |
-| `/jiraboard info` | Show board configuration |
-| `/jiraboard debug` | Show debug information |
+| `/jiraboard spawn` | Build the board from your live Jira sprint |
+| `/jiraboard refresh` | Rebuild with fresh data |
+| `/jiraboard delete` | Destroy the board (with TNT, naturally) |
+| `/jiraboard setaihopper` | Mark a hopper as the AI implementation trigger |
+| `/standup` | Teleport everyone to the board |
 
-All commands work from command blocks (except `setaihopper` and `delete` which require a player).
+---
 
-## Configuration Details
+## What Makes This Impressive
 
-### Fireworks
+- **It actually works end-to-end** — move a book, Jira updates; throw a book, a real PR appears on GitHub
+- **Fully async** — Jira calls and AI generation never lag the Minecraft server
+- **Two-phase architecture** — clean separation between the Java plugin (game events + Jira) and the Node.js MCP server (AI + GitHub)
+- **Production-grade details** — duplicate transition prevention, error handling with player feedback, configurable fireworks, debug mode
+- **Playful UX** — color-coded books, fireworks on completion, elevator music during AI generation, TNT on board deletion
 
-Fireworks are fully customizable via `config.yml`. Any RGB hex color is supported (Minecraft fireworks use raw RGB, not a limited palette).
+---
 
-Available effect types: `BALL`, `BALL_LARGE`, `STAR`, `BURST`, `CREEPER`
+## Want to run it?
 
-### Board Spawn
+See [QUICKSTART.md](QUICKSTART.md) for a 5-minute setup, or [SETUP-GUIDE.md](SETUP-GUIDE.md) for the full walkthrough.
 
-The board centers itself on the anchor X coordinate. Columns auto-size their width based on ticket count, with a fixed height of 4 rows. Each column uses colored terracotta backing and has a sign header.
+---
 
-You can spawn from a command block:
-```
-/jiraboard spawn 0 -59 -15
-```
-
-Or wire a button to a command block with this command to refresh on demand.
-
-### AI Hopper
-
-1. Place a hopper in-game
-2. Look at it and run `/jiraboard setaihopper`
-3. Throw written books with Jira ticket keys into the hopper
-4. The MCP server handles implementation via Claude/Bedrock
-5. A PR is created and the link is sent back to the player
-
-## EC2 Deployment
-
-The server runs on AWS EC2 (`eu-central-1`). The instance has an IAM role for Bedrock access — no manual AWS credentials needed.
-
-```bash
-ssh ubuntu@<ec2-host>
-
-# Minecraft server
-cd /home/ubuntu/minecraft
-java -jar paper-26.1.2-69.jar
-
-# MCP server
-cd /home/ubuntu/minecraft/byndiecraft-plugin/mcp-server
-nohup node server.js > /tmp/mcp-server.log 2>&1 &
-
-# Check logs
-tail -f /tmp/mcp-server.log
-```
-
-## Troubleshooting
-
-| Problem | Solution |
-|---------|----------|
-| "Failed to update ticket" | Check Jira credentials and ticket permissions |
-| Books not detected in hopper | Run `/jiraboard setaihopper` while looking at the hopper |
-| MCP server "Repository not found" | Run `gh auth setup-git` to configure git HTTPS auth |
-| No fireworks on Done | Check that the column's `jira_status_name` matches "Closed" or "Done" |
-| Board too high/low | Adjust `board.anchor.y` in config.yml |
-
-Enable debug mode (`debug: true`) for verbose logging in `logs/latest.log`.
-
-## Team
-
-Built by Team Byndiecraft for the Bynder Hackathon 2026.
+Built by **Team Byndiecraft** for the Bynder Hackathon 2026.
