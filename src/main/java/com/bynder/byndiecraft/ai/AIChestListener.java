@@ -219,9 +219,9 @@ public class AIChestListener implements Listener {
             player.spawnParticle(Particle.PORTAL, hopperLoc, 30, 0.3, 0.3, 0.3, 0.5);
         }
 
-        player.sendMessage(Component.text("🤖 Claude is implementing " + ticketKey + "...")
+        Bukkit.broadcast(Component.text("🤖 Claude is implementing " + ticketKey + "...")
                 .color(NamedTextColor.LIGHT_PURPLE));
-        player.sendMessage(Component.text("The hopper has consumed your book!")
+        Bukkit.broadcast(Component.text("The hopper has consumed your book!")
                 .color(NamedTextColor.GRAY));
 
         plugin.getLogger().info(String.format("[AIHopper] Starting AI task for ticket: %s", ticketKey));
@@ -242,7 +242,7 @@ public class AIChestListener implements Listener {
                 returnBookWithPRLink(player, book, result.getPrUrl(), result.getSummary());
             }
 
-            player.sendMessage(Component.text("✅ PR Created: ")
+            Bukkit.broadcast(Component.text("✅ PR Created: ")
                     .color(NamedTextColor.GREEN)
                     .append(Component.text(result.getPrUrl())
                             .color(NamedTextColor.AQUA)
@@ -260,7 +260,7 @@ public class AIChestListener implements Listener {
             // Failure - return book with error
             returnBookWithError(player, book, result.getError());
 
-            player.sendMessage(Component.text("❌ Failed to implement ticket: " + result.getError())
+            Bukkit.broadcast(Component.text("❌ Failed to implement ticket: " + result.getError())
                     .color(NamedTextColor.RED));
 
             if (plugin.getConfig().getBoolean("ai.visual_effects", true)) {
