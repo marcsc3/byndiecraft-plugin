@@ -139,7 +139,7 @@ public class AITaskManager {
 
     private void sendProgress(Player player, String message, NamedTextColor color) {
         Bukkit.getScheduler().runTask(plugin, () -> {
-            player.sendMessage(Component.text(message).color(color));
+            Bukkit.broadcast(Component.text(message).color(color));
         });
     }
 }

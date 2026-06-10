@@ -183,7 +183,7 @@ async function implementWithClaude({ ticketKey, ticketSummary, ticketDescription
 
     const payload = {
         anthropic_version: 'bedrock-2023-05-31',
-        max_tokens: 4000,
+        max_tokens: 16000,
         messages: [{
             role: 'user',
             content: prompt
@@ -209,13 +209,29 @@ async function implementWithClaude({ ticketKey, ticketSummary, ticketDescription
 
         // Parse Claude's response
         const summary = extractField(content, 'SUMMARY') || ticketSummary;
-        const commitMessage = extractField(content, 'COMMIT_MESSAGE') || `Implement ${ticketKey}: ${ticketSummary}`;
+        let commitMessage = extractField(content, 'COMMIT_MESSAGE') || `Implement ${ticketKey}: ${ticketSummary}`;
+        // Strip any backticks or code fences from commit message
+        commitMessage = commitMessage.replace(/^`+|`+$/g, '').trim();
 
-        // For now, we're using Claude's text response
-        // In a full implementation, you'd use Claude's tool use feature to actually edit files
-        // For the hackathon, we'll create a simple marker file
-        const implementationFile = path.join(workDir, 'IMPLEMENTATION.md');
-        fs.writeFileSync(implementationFile, `# ${ticketKey}: ${ticketSummary}\n\n${content}\n\nImplemented by Claude via Byndiecraft MCP Server\n`);
+        // Parse and write FILE blocks
+        const fileBlocks = parseFileBlocks(content);
+        if (fileBlocks.length > 0) {
+            console.log(`[MCP] Writing ${fileBlocks.length} file(s)...`);
+            for (const block of fileBlocks) {
+                const filePath = path.join(workDir, block.path);
+                const dir = path.dirname(filePath);
+                if (!fs.existsSync(dir)) {
+                    fs.mkdirSync(dir, { recursive: true });
+                }
+                fs.writeFileSync(filePath, block.content);
+                console.log(`[MCP]   - ${block.path}`);
+            }
+        } else {
+            // Fallback: write the raw response as implementation notes
+            console.log('[MCP] No FILE blocks found, writing raw response');
+            const implementationFile = path.join(workDir, 'IMPLEMENTATION.md');
+            fs.writeFileSync(implementationFile, `# ${ticketKey}: ${ticketSummary}\n\n${content}\n`);
+        }
 
         return {
             summary,
@@ -231,32 +247,45 @@ async function implementWithClaude({ ticketKey, ticketSummary, ticketDescription
 
 // Build the prompt for Claude
 function buildImplementationPrompt(ticketKey, ticketSummary, ticketDescription, workDir, repoInfo) {
-    return `You are implementing a Jira ticket for a Minecraft hackathon project called Byndiecraft.
+    // Get the repo file tree to give Claude context
+    let fileTree = '';
+    try {
+        fileTree = execSync('find . -type f -not -path "./.git/*" | head -100', {
+            cwd: workDir,
+            encoding: 'utf-8',
+            stdio: ['pipe', 'pipe', 'pipe']
+        });
+    } catch (e) {
+        fileTree = '(could not list files)';
+    }
+
+    return `You are implementing a Jira ticket. Write ACTUAL CODE changes.
 
 Ticket: ${ticketKey}
 Summary: ${ticketSummary}
 Description: ${ticketDescription || 'No additional description provided'}
 
 Repository: ${repoInfo.owner}/${repoInfo.repo}
-Working Directory: ${workDir}
 
-This is a DEMO for a hackathon. Your task is to:
-1. Analyze what this ticket is asking for
-2. Provide a clear implementation plan
-3. Explain what files you would modify and how
+Files in the repository:
+${fileTree}
 
-Since this is a demo, you don't need to write actual working code - just provide a clear, detailed implementation plan.
+Your task: implement this ticket by writing real code changes.
 
-Respond in this format:
+Respond in EXACTLY this format (no markdown fences around the whole response):
 
-SUMMARY: <One-line summary of what you would implement>
+SUMMARY: <One-line summary of the change>
 
-IMPLEMENTATION_PLAN:
-<Detailed explanation of what you would do, which files you'd modify, and how>
+COMMIT_MESSAGE: <Short commit message, no backticks, no markdown>
 
-COMMIT_MESSAGE: <A good git commit message for these changes>
+FILE: <relative/path/to/file>
+CONTENT:
+<entire file content here>
+END_FILE
 
-Be specific and detailed, but remember this is a hackathon demo - focus on clarity over perfection.`;
+You can output multiple FILE blocks. Write the full file content for each file you create or modify.
+Keep changes minimal and focused on what the ticket asks for.
+Do NOT wrap COMMIT_MESSAGE in backticks or code fences.`;
 }
 
 // Extract a field from Claude's response
@@ -264,6 +293,20 @@ function extractField(content, fieldName) {
     const regex = new RegExp(`${fieldName}:\\s*(.+?)(?=\\n\\n|\\n[A-Z_]+:|$)`, 's');
     const match = content.match(regex);
     return match ? match[1].trim() : null;
+}
+
+// Parse FILE: ... CONTENT: ... END_FILE blocks from Claude's response
+function parseFileBlocks(content) {
+    const blocks = [];
+    const regex = /FILE:\s*(.+?)\nCONTENT:\n([\s\S]*?)END_FILE/g;
+    let match;
+    while ((match = regex.exec(content)) !== null) {
+        blocks.push({
+            path: match[1].trim(),
+            content: match[2]
+        });
+    }
+    return blocks;
 }
 
 // Create branch and commit changes
