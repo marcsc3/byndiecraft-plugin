@@ -5,10 +5,15 @@ import com.bynder.byndiecraft.board.BoardManager;
 import com.bynder.byndiecraft.board.StatusColumn;
 import com.bynder.byndiecraft.jira.JiraClient;
 import com.bynder.byndiecraft.util.BookParser;
+import com.bynder.byndiecraft.util.ConfigLoader;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Bukkit;
+import org.bukkit.FireworkEffect;
+import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.entity.EntityType;
+import org.bukkit.entity.Firework;
 import org.bukkit.entity.ItemFrame;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -17,6 +22,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.BookMeta;
+import org.bukkit.inventory.meta.FireworkMeta;
 
 import java.util.Optional;
 
@@ -112,14 +118,29 @@ public class ItemFrameListener implements Listener {
         }
 
         BookMeta bookMeta = (BookMeta) item.getItemMeta();
-        if (bookMeta == null || !bookMeta.hasTitle()) {
-            plugin.getLogger().warning("[ItemFrame] Book has no title!");
-            player.sendMessage(Component.text("⚠ Book must have a title with a Jira ticket key (e.g., TAP-123)")
+        if (bookMeta == null) {
+            plugin.getLogger().warning("[ItemFrame] Book has no metadata!");
+            player.sendMessage(Component.text("⚠ Book must have a title with a Jira ticket key (e.g., SHARE-123)")
                     .color(NamedTextColor.YELLOW));
             return;
         }
 
+        // Try book title first, then fall back to display name
         String bookTitle = bookMeta.getTitle();
+        if (bookTitle == null || bookTitle.isEmpty()) {
+            var displayName = bookMeta.displayName();
+            if (displayName != null) {
+                bookTitle = net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer.plainText().serialize(displayName);
+            }
+        }
+
+        if (bookTitle == null || bookTitle.isEmpty()) {
+            plugin.getLogger().warning("[ItemFrame] Book has no title!");
+            player.sendMessage(Component.text("⚠ Book must have a title with a Jira ticket key (e.g., SHARE-123)")
+                    .color(NamedTextColor.YELLOW));
+            return;
+        }
+
         plugin.getLogger().info("[ItemFrame] Book title: \"" + bookTitle + "\"");
 
         Optional<String> ticketKeyOpt = BookParser.extractTicketKey(bookTitle);
@@ -136,6 +157,15 @@ public class ItemFrameListener implements Listener {
 
         plugin.getLogger().info("[ItemFrame] Extracted ticket key: " + ticketKey);
         plugin.getLogger().info("[ItemFrame] Target Jira status: " + targetStatus);
+
+        // Skip if the ticket is already in this status
+        Optional<String> cachedStatus = boardManager.getCachedStatus(ticketKey);
+        if (cachedStatus.isPresent() && cachedStatus.get().equalsIgnoreCase(targetStatus)) {
+            if (debugMode) {
+                plugin.getLogger().info("[ItemFrame] Ticket " + ticketKey + " already in status '" + targetStatus + "', skipping");
+            }
+            return;
+        }
 
         if (debugMode) {
             plugin.getLogger().info(String.format("Book placed: %s -> Column: %s (Jira: %s)",
@@ -154,6 +184,11 @@ public class ItemFrameListener implements Listener {
                     player.sendMessage(Component.text("✓ " + ticketKey + " moved to '" + targetStatus + "'")
                             .color(NamedTextColor.GREEN));
                     boardManager.cacheTicketStatus(ticketKey, targetStatus);
+
+                    // Launch fireworks when ticket moves to Done/Closed
+                    if (isDoneStatus(targetStatus)) {
+                        launchFirework(frame.getLocation());
+                    }
 
                     // Optional: Play success sound
                     player.playSound(player.getLocation(), org.bukkit.Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1.0f, 1.0f);
@@ -176,6 +211,22 @@ public class ItemFrameListener implements Listener {
             });
             return null;
         });
+    }
+
+    private boolean isDoneStatus(String status) {
+        String lower = status.toLowerCase();
+        return lower.equals("done") || lower.equals("closed");
+    }
+
+    private void launchFirework(Location location) {
+        ConfigLoader configLoader = plugin.getConfigLoader();
+        if (!configLoader.isFireworksEnabled()) return;
+
+        Firework firework = (Firework) location.getWorld().spawnEntity(location, EntityType.FIREWORK_ROCKET);
+        FireworkMeta meta = firework.getFireworkMeta();
+        meta.addEffect(configLoader.getFireworkEffect());
+        meta.setPower(configLoader.getFireworksPower());
+        firework.setFireworkMeta(meta);
     }
 
     private String formatLocation(ItemFrame frame) {

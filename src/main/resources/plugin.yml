@@ -15,6 +15,10 @@ commands:
       /jiraboard refresh - Manually sync with Jira (Phase 2)
     permission: byndiecraft.admin
     aliases: [jb]
+  standup:
+    description: Teleport all players in front of the Jira board for standup
+    permission: byndiecraft.admin
+    aliases: [su]
 
 permissions:
   byndiecraft.admin:

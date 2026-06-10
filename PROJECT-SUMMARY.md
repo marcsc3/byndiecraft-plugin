@@ -9,10 +9,11 @@ A **Minecraft plugin** that synchronizes Jira tickets with in-game item frames, 
 ### Core Functionality
 - ✅ **Jira REST API Integration** - Full OAuth authentication with Bynder's Jira instance
 - ✅ **Item Frame Event Detection** - Listens for books being placed in tracked frames
-- ✅ **Book Parsing** - Extracts Jira ticket keys from book titles (e.g., `TAP-123`)
+- ✅ **Book Parsing** - Extracts Jira ticket keys from book titles (e.g., `SHARE-123`)
 - ✅ **Real-Time Sync** - Async HTTP calls to Jira API when books are moved
 - ✅ **Status Transitions** - Automatically determines correct transition ID and updates Jira
 - ✅ **Player Feedback** - Success/error messages with sound effects
+- ✅ **Dynamic Columns** - Auto-creates columns for any Jira status found in tickets
 - ✅ **Board Configuration** - YAML-based configuration for frame coordinates and status mapping
 - ✅ **Command System** - `/jiraboard` commands for board management
 
@@ -115,7 +116,7 @@ byndiecraft-plugin/
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│ Player places book "TAP-123" in "In Progress" frame         │
+│ Player places book "SHARE-123" in "In Progress" frame         │
 └─────────────────────┬───────────────────────────────────────┘
                       │
                       v
@@ -135,21 +136,21 @@ byndiecraft-plugin/
                       │
                       v
 ┌─────────────────────────────────────────────────────────────┐
-│ JiraClient.transitionIssue("TAP-123", "In Progress")        │
-│  1. getTransitions("TAP-123")                               │
-│     → GET /rest/api/3/issue/TAP-123/transitions             │
+│ JiraClient.transitionIssue("SHARE-123", "In Progress")        │
+│  1. getTransitions("SHARE-123")                               │
+│     → GET /rest/api/3/issue/SHARE-123/transitions             │
 │     → Returns: {"transitions": [{"id": "21", "name": "..."}]}│
 │  2. Find transition ID for "In Progress" status             │
-│  3. executeTransition("TAP-123", "21")                      │
-│     → POST /rest/api/3/issue/TAP-123/transitions            │
+│  3. executeTransition("SHARE-123", "21")                      │
+│     → POST /rest/api/3/issue/SHARE-123/transitions            │
 │     → Body: {"transition": {"id": "21"}}                    │
 └─────────────────────┬───────────────────────────────────────┘
                       │
                       v
 ┌─────────────────────────────────────────────────────────────┐
 │ Response to Player                                          │
-│  ✓ Success: "✓ TAP-123 moved to 'In Progress'"            │
-│  ✗ Error:   "✗ Failed to update TAP-123 in Jira"          │
+│  ✓ Success: "✓ SHARE-123 moved to 'In Progress'"            │
+│  ✗ Error:   "✗ Failed to update SHARE-123 in Jira"          │
 └─────────────────────────────────────────────────────────────┘
 ```
 
@@ -193,9 +194,9 @@ byndiecraft-plugin/
    - Written books representing real Jira tickets
 
 2. **Live Sync Demo** (2 min)
-   - Player 1: Move TAP-123 to "In Progress"
+   - Player 1: Move SHARE-123 to "In Progress"
    - Show Jira browser tab update
-   - Player 2: Move TAP-456 to "Done"
+   - Player 2: Move SHARE-456 to "Done"
    - Show Jira update again
 
 3. **Error Handling** (30 sec)

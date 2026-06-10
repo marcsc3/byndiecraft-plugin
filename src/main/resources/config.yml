@@ -5,15 +5,16 @@ jira:
   # Your Jira instance URL
   url: "https://bynder.atlassian.net"
 
-  # Your Jira email address
-  email: "your-email@bynder.com"
-
-  # API token (can also be set via JIRA_API_TOKEN environment variable)
-  # Generate at: https://id.atlassian.com/manage-profile/security/api-tokens
-  api_token: "${JIRA_API_TOKEN}"
-
   # Project key for your Jira board
   project_key: "SHARE"
+
+  # Credentials are loaded from credentials.yml (in the plugin data folder)
+  # Create plugins/Byndiecraft/credentials.yml with:
+  #   jira:
+  #     email: "your-email@bynder.com"
+  #     api_token: "your-token-here"
+  #
+  # Alternatively, set JIRA_API_TOKEN environment variable
 
 board:
   # Minecraft world name where the board is located
@@ -22,9 +23,9 @@ board:
   # Fixed anchor point where the board spawns (top-left corner)
   # If not set, /jiraboard spawn uses the player's current location
   anchor:
-    x: 100
-    y: 100
-    z: 200
+    x: 0
+    y: -59
+    z: -15
 
   # Status columns configuration
   # "name" is displayed on the Minecraft sign; "jira_status_name" must match the API status
@@ -42,12 +43,22 @@ board:
       frames: []
 
     - name: "Merge"
-      jira_status_name: "Closed"
+      jira_status_name: "Merge"
       frames: []
 
     - name: "Done"
-      jira_status_name: "Done"
+      jira_status_name: "Closed"
       frames: []
+
+# Fireworks when a ticket moves to "Done" column
+fireworks:
+  enabled: true
+  power: 1
+  type: BALL_LARGE
+  colors: ["#FF0000", "#FFD700", "#00FF00"]
+  fade_colors: ["#FFFFFF"]
+  trail: true
+  flicker: true
 
 # Phase 2: AI-Powered Ticket Implementation
 ai:

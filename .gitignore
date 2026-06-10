@@ -46,6 +46,7 @@ world_the_end/
 # Config with secrets
 src/main/resources/config-local.yml
 config-local.yml
+credentials.yml
 setup-env.sh
 
 # Logs

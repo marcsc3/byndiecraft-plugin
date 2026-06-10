@@ -1,6 +1,7 @@
 {
-  "pack": {
-    "pack_format": "101.1",
-    "description": "Byndiecraft - Feudal Japanese Fantasy Town for Daily Standups"
-  }
+    "pack": {
+        "description": "Byndiecraft - Feudal Japanese Fantasy Town for Daily Standups",
+        "min_format": [101, 1],
+        "max_format": [101, 1]
+    }
 }

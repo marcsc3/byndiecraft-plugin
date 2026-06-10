@@ -24,7 +24,16 @@ public class BoardSpawner {
     private final JiraClient jiraClient;
     private final BoardManager boardManager;
 
-    private static final int COLUMN_SPACING = 4;
+    private static final int MAX_HEIGHT = 3; // 3 rows tall — visible in survival without looking up
+    private static final int SEPARATOR_WIDTH = 1; // 1 empty block between columns
+
+    private static final Material[] COLUMN_COLORS = {
+            Material.WHITE_CONCRETE,
+            Material.LIGHT_BLUE_CONCRETE,
+            Material.YELLOW_CONCRETE,
+            Material.PURPLE_CONCRETE,
+            Material.LIME_CONCRETE
+    };
 
     public BoardSpawner(ByndiecraftPlugin plugin, JiraClient jiraClient, BoardManager boardManager) {
         this.plugin = plugin;
@@ -51,16 +60,6 @@ public class BoardSpawner {
 
                 buildBoard(player, anchor, tickets);
 
-                // Teleport all online players to the board
-                Location tpTarget = anchor.clone().add(0, 0, 3);
-                tpTarget.setYaw(0);
-                tpTarget.setPitch(0);
-                for (Player online : Bukkit.getOnlinePlayers()) {
-                    online.teleport(tpTarget);
-                    online.sendMessage(Component.text("✓ Teleported to the Jira board!")
-                            .color(NamedTextColor.GREEN));
-                }
-
                 player.sendMessage(Component.text("✓ Board spawned with " + tickets.size() + " tickets!")
                         .color(NamedTextColor.GREEN));
                 player.playSound(player.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 1.0f, 1.0f);
@@ -74,46 +73,43 @@ public class BoardSpawner {
         });
     }
 
-    public void clearBoard(Location anchor, int columnCount, int maxHeight) {
+    public void clearBoard(Location anchor, int totalWidth) {
         World world = anchor.getWorld();
         if (world == null) return;
 
-        int totalWidth = columnCount * COLUMN_SPACING;
         int startX = anchor.getBlockX();
         int startY = anchor.getBlockY();
         int startZ = anchor.getBlockZ();
 
-        // Remove entities (item frames) in the area
+        // Remove item frames in the area
         world.getEntities().stream()
                 .filter(e -> e instanceof ItemFrame)
                 .filter(e -> {
                     Location loc = e.getLocation();
-                    return loc.getBlockX() >= startX && loc.getBlockX() < startX + totalWidth
-                            && loc.getBlockY() >= startY - maxHeight && loc.getBlockY() <= startY + 1
-                            && Math.abs(loc.getBlockZ() - startZ) <= 1;
+                    return loc.getBlockX() >= startX - 1 && loc.getBlockX() < startX + totalWidth + 1
+                            && loc.getBlockY() >= startY - 1 && loc.getBlockY() <= startY + MAX_HEIGHT + 2
+                            && Math.abs(loc.getBlockZ() - startZ) <= 2;
                 })
                 .forEach(e -> e.remove());
 
-        // Clear blocks (signs at startY+1, frames area, and backing wall)
-        for (int x = startX; x < startX + totalWidth; x++) {
-            for (int y = startY - maxHeight; y <= startY + 1; y++) {
-                Block block = world.getBlockAt(x, y, startZ);
-                if (block.getType() != Material.AIR) {
-                    block.setType(Material.AIR);
-                }
-                Block backing = world.getBlockAt(x, y, startZ - 1);
-                if (backing.getType() == Material.OAK_PLANKS) {
-                    backing.setType(Material.AIR);
+        // Clear everything: backing, frames, decorations, floor, roof
+        for (int x = startX - 1; x < startX + totalWidth + 1; x++) {
+            for (int y = startY - 1; y <= startY + MAX_HEIGHT + 2; y++) {
+                for (int dz = -1; dz <= 1; dz++) {
+                    Block block = world.getBlockAt(x, y, startZ + dz);
+                    if (block.getType() != Material.AIR) {
+                        block.setType(Material.AIR);
+                    }
                 }
             }
         }
     }
 
+
     private void buildBoard(Player player, Location anchor, List<JiraTicket> tickets) {
         World world = anchor.getWorld();
         if (world == null) return;
 
-        // Group tickets by their current status (case-insensitive matching)
         Map<String, List<JiraTicket>> ticketsByStatus = tickets.stream()
                 .collect(Collectors.groupingBy(t -> t.getStatus().toLowerCase()));
 
@@ -121,58 +117,58 @@ public class BoardSpawner {
             plugin.getLogger().info("Ticket statuses found: " + ticketsByStatus.keySet());
         }
 
-        // Build columns dynamically: start with configured ones, then add any new statuses
-        List<StatusColumn> columns = new ArrayList<>(boardManager.getBoard().getColumns());
-        Set<String> knownStatuses = columns.stream()
-                .map(c -> c.getJiraStatusName().toLowerCase())
-                .collect(Collectors.toSet());
+        List<StatusColumn> columns = boardManager.getBoard().getColumns();
 
-        for (String status : ticketsByStatus.keySet()) {
-            if (!knownStatuses.contains(status)) {
-                String displayName = tickets.stream()
-                        .filter(t -> t.getStatus().toLowerCase().equals(status))
-                        .map(JiraTicket::getStatus)
-                        .findFirst()
-                        .orElse(status);
-                columns.add(new StatusColumn(displayName, displayName));
-                if (plugin.getConfigLoader().isDebugMode()) {
-                    plugin.getLogger().info("Auto-created column for status: " + displayName);
-                }
-            }
+        // Calculate width needed per column: ceil(ticketCount / MAX_HEIGHT) blocks wide, minimum 2
+        int[] columnWidths = new int[columns.size()];
+        for (int i = 0; i < columns.size(); i++) {
+            int count = ticketsByStatus.getOrDefault(columns.get(i).getJiraStatusName().toLowerCase(), Collections.emptyList()).size();
+            columnWidths[i] = Math.max(2, (count + MAX_HEIGHT - 1) / MAX_HEIGHT);
         }
 
-        boardManager.getBoard().setColumns(columns);
+        // Total board width
+        int totalWidth = 0;
+        for (int i = 0; i < columnWidths.length; i++) {
+            totalWidth += columnWidths[i];
+            if (i < columnWidths.length - 1) totalWidth += SEPARATOR_WIDTH;
+        }
 
-        // Find tallest column to size the backing wall
-        int maxHeight = ticketsByStatus.values().stream()
-                .mapToInt(List::size)
-                .max()
-                .orElse(0);
-
-        // Clear existing board
-        clearBoard(anchor, columns.size(), maxHeight);
-
-        int baseX = anchor.getBlockX();
+        int anchorX = anchor.getBlockX();
+        int baseX = anchorX - (totalWidth / 2); // center the board on anchor X
         int baseY = anchor.getBlockY();
         int baseZ = anchor.getBlockZ();
 
+        clearBoard(new Location(world, baseX, baseY, baseZ), totalWidth);
+        int topY = baseY + MAX_HEIGHT;
+
+        // Floor base — dark oak slab platform
+        for (int x = baseX - 1; x <= baseX + totalWidth; x++) {
+            world.getBlockAt(x, baseY - 1, baseZ).setType(Material.DARK_OAK_SLAB);
+            world.getBlockAt(x, baseY - 1, baseZ - 1).setType(Material.DARK_OAK_SLAB);
+            world.getBlockAt(x, baseY - 1, baseZ + 1).setType(Material.DARK_OAK_SLAB);
+        }
+
+        int currentX = baseX;
+
         for (int colIdx = 0; colIdx < columns.size(); colIdx++) {
             StatusColumn column = columns.get(colIdx);
-            int colX = baseX + (colIdx * COLUMN_SPACING);
+            int colWidth = columnWidths[colIdx];
 
             List<JiraTicket> columnTickets = ticketsByStatus.getOrDefault(column.getJiraStatusName().toLowerCase(), Collections.emptyList());
             int ticketCount = columnTickets.size();
 
-            // Place backing wall for this column (includes sign row at baseY + 1)
-            for (int y = baseY + 1; y >= baseY - ticketCount; y--) {
-                for (int dx = 0; dx < 2; dx++) {
-                    Block backing = world.getBlockAt(colX + dx, y, baseZ - 1);
-                    backing.setType(Material.OAK_PLANKS);
+            // Backing wall — colored concrete, fixed height
+            Material wallMaterial = COLUMN_COLORS[colIdx % COLUMN_COLORS.length];
+            for (int y = baseY; y <= topY; y++) {
+                for (int dx = 0; dx < colWidth; dx++) {
+                    Block backing = world.getBlockAt(currentX + dx, y, baseZ - 1);
+                    backing.setType(wallMaterial);
                 }
             }
 
-            // Place sign header above column
-            Block signBlock = world.getBlockAt(colX, baseY + 1, baseZ);
+            // Column header sign at the top center
+            int signX = currentX + (colWidth / 2);
+            Block signBlock = world.getBlockAt(signX, topY + 1, baseZ);
             signBlock.setType(Material.OAK_WALL_SIGN);
             org.bukkit.block.data.type.WallSign signData =
                     (org.bukkit.block.data.type.WallSign) signBlock.getBlockData();
@@ -184,27 +180,65 @@ public class BoardSpawner {
                 sign.update();
             }
 
-            // Clear existing frame locations for this column
+            // Backing behind the sign
+            world.getBlockAt(signX, topY + 1, baseZ - 1).setType(wallMaterial);
+
             column.getFrameLocations().forEach(column::removeFrameLocation);
 
-            // Place item frames with books going downward from anchor
-            for (int i = 0; i < ticketCount; i++) {
-                JiraTicket ticket = columnTickets.get(i);
-                int frameY = baseY - i;
-                Location frameLoc = new Location(world, colX, frameY, baseZ);
+            // Place item frames: fill columns top-to-bottom, then left-to-right
+            int ticketIdx = 0;
+            for (int dx = 0; dx < colWidth; dx++) {
+                for (int row = 0; row < MAX_HEIGHT; row++) {
+                    int frameY = baseY + (MAX_HEIGHT - 1 - row); // top to bottom
+                    Location frameLoc = new Location(world, currentX + dx, frameY, baseZ);
 
-                // Spawn item frame on the wall
-                ItemFrame frame = (ItemFrame) world.spawnEntity(frameLoc, EntityType.ITEM_FRAME);
-                frame.setFacingDirection(BlockFace.SOUTH);
+                    ItemFrame frame = (ItemFrame) world.spawnEntity(frameLoc, EntityType.ITEM_FRAME);
+                    frame.setFacingDirection(BlockFace.SOUTH);
 
-                // Create a written book for this ticket
-                ItemStack book = createTicketBook(ticket);
-                frame.setItem(book);
+                    if (ticketIdx < ticketCount) {
+                        JiraTicket ticket = columnTickets.get(ticketIdx);
+                        ItemStack book = createTicketBook(ticket);
+                        frame.setItem(book);
+                        boardManager.cacheTicketStatus(ticket.getKey(), column.getJiraStatusName());
+                        ticketIdx++;
+                    }
 
-                // Register this frame location with the board
-                column.addFrameLocation(frameLoc);
-                boardManager.cacheTicketStatus(ticket.getKey(), column.getJiraStatusName());
+                    column.addFrameLocation(frameLoc);
+                }
             }
+
+            currentX += colWidth;
+
+            // Separator pillar between columns
+            if (colIdx < columns.size() - 1) {
+                for (int y = baseY; y <= topY; y++) {
+                    world.getBlockAt(currentX, y, baseZ - 1).setType(Material.DARK_OAK_LOG);
+                }
+                // Lantern on the pillar
+                world.getBlockAt(currentX, baseY + 1, baseZ).setType(Material.LANTERN);
+                currentX += SEPARATOR_WIDTH;
+            }
+        }
+
+        // Top roof trim — spruce slab across the top
+        for (int x = baseX - 1; x <= baseX + totalWidth; x++) {
+            world.getBlockAt(x, topY + 2, baseZ - 1).setType(Material.SPRUCE_SLAB);
+        }
+
+        // Corner pillars with soul lanterns
+        int leftPillarX = baseX - 1;
+        int rightPillarX = baseX + totalWidth;
+        for (int y = baseY; y <= topY + 2; y++) {
+            world.getBlockAt(leftPillarX, y, baseZ - 1).setType(Material.DARK_OAK_LOG);
+            world.getBlockAt(rightPillarX, y, baseZ - 1).setType(Material.DARK_OAK_LOG);
+        }
+        world.getBlockAt(leftPillarX, topY + 2, baseZ).setType(Material.SOUL_LANTERN);
+        world.getBlockAt(rightPillarX, topY + 2, baseZ).setType(Material.SOUL_LANTERN);
+
+        // Flower pots along the base
+        for (int x = baseX; x < baseX + totalWidth; x += 3) {
+            Block pot = world.getBlockAt(x, baseY, baseZ + 1);
+            pot.setType(Material.POTTED_FERN);
         }
     }
 
@@ -212,11 +246,35 @@ public class BoardSpawner {
         ItemStack book = new ItemStack(Material.WRITTEN_BOOK);
         BookMeta meta = (BookMeta) book.getItemMeta();
 
-        meta.setTitle(ticket.getKey() + ": " + ticket.getSummary());
+        String fullTitle = ticket.getKey() + ": " + ticket.getSummary();
+        // Minecraft book titles are capped at 32 chars
+        String bookTitle = fullTitle.length() > 32 ? fullTitle.substring(0, 32) : fullTitle;
+        meta.setTitle(bookTitle);
         meta.setAuthor("Jira");
-        meta.addPages(Component.text(ticket.getKey() + "\n\n" + ticket.getSummary() + "\n\nStatus: " + ticket.getStatus()));
+        meta.displayName(Component.text(fullTitle).color(getColorForType(ticket.getIssueType())));
+
+        meta.addPages(Component.text(ticket.getKey() + "\n\n" + ticket.getSummary() + "\n\nType: " + ticket.getIssueType() + "\nStatus: " + ticket.getStatus()));
+
+        String desc = ticket.getDescription();
+        if (desc != null && !desc.isEmpty()) {
+            for (int i = 0; i < desc.length(); i += 256) {
+                String pageText = desc.substring(i, Math.min(i + 256, desc.length()));
+                meta.addPages(Component.text(pageText));
+            }
+        }
 
         book.setItemMeta(meta);
         return book;
+    }
+
+    private NamedTextColor getColorForType(String issueType) {
+        if (issueType == null) return NamedTextColor.WHITE;
+        return switch (issueType.toLowerCase()) {
+            case "bug" -> NamedTextColor.RED;
+            case "story" -> NamedTextColor.GREEN;
+            case "task", "sub-task", "subtask" -> NamedTextColor.AQUA;
+            case "spike" -> NamedTextColor.GOLD;
+            default -> NamedTextColor.WHITE;
+        };
     }
 }

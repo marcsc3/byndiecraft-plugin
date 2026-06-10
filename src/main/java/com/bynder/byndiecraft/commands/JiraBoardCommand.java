@@ -6,13 +6,17 @@ import com.bynder.byndiecraft.board.BoardSpawner;
 import com.bynder.byndiecraft.board.StatusColumn;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.Sound;
+import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.Player;
+import org.bukkit.entity.TNTPrimed;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -59,10 +63,13 @@ public class JiraBoardCommand implements CommandExecutor, TabCompleter {
                 return handleDebug(sender);
 
             case "spawn":
-                return handleSpawn(sender);
+                return handleSpawn(sender, args);
 
             case "refresh":
                 return handleRefresh(sender);
+
+            case "delete":
+                return handleDelete(sender);
 
             case "setaihopper":
                 return handleSetAIHopper(sender);
@@ -158,17 +165,34 @@ public class JiraBoardCommand implements CommandExecutor, TabCompleter {
         return true;
     }
 
-    private boolean handleSpawn(CommandSender sender) {
+    private boolean handleSpawn(CommandSender sender, String[] args) {
         if (!(sender instanceof Player player)) {
             sender.sendMessage(Component.text("This command can only be used by players!")
                     .color(NamedTextColor.RED));
             return true;
         }
 
-        Location anchor = getAnchorLocation(player);
+        Location anchor = null;
+
+        // /jiraboard spawn <x> <y> <z>
+        if (args.length >= 4) {
+            try {
+                int x = Integer.parseInt(args[1]);
+                int y = Integer.parseInt(args[2]);
+                int z = Integer.parseInt(args[3]);
+                anchor = new Location(player.getWorld(), x, y, z);
+            } catch (NumberFormatException e) {
+                player.sendMessage(Component.text("⚠ Invalid coordinates. Usage: /jiraboard spawn <x> <y> <z>")
+                        .color(NamedTextColor.RED));
+                return true;
+            }
+        }
+
         if (anchor == null) {
-            player.sendMessage(Component.text("⚠ Board anchor not configured! Set board.anchor in config.yml")
-                    .color(NamedTextColor.YELLOW));
+            anchor = getAnchorLocation(player);
+        }
+
+        if (anchor == null) {
             player.sendMessage(Component.text("Using your current location as anchor...")
                     .color(NamedTextColor.GRAY));
             anchor = player.getLocation().getBlock().getLocation();
@@ -177,6 +201,7 @@ public class JiraBoardCommand implements CommandExecutor, TabCompleter {
         boardSpawner.spawn(player, anchor);
         return true;
     }
+
 
     private boolean handleRefresh(CommandSender sender) {
         if (!(sender instanceof Player player)) {
@@ -191,6 +216,50 @@ public class JiraBoardCommand implements CommandExecutor, TabCompleter {
         }
 
         boardSpawner.spawn(player, anchor);
+        return true;
+    }
+
+    private boolean handleDelete(CommandSender sender) {
+        if (!(sender instanceof Player player)) {
+            sender.sendMessage(Component.text("This command can only be used by players!")
+                    .color(NamedTextColor.RED));
+            return true;
+        }
+
+        Location configAnchor = getAnchorLocation(player);
+        final Location anchor = configAnchor != null ? configAnchor : player.getLocation().getBlock().getLocation();
+
+        World world = anchor.getWorld();
+        if (world == null) return true;
+
+        int anchorX = anchor.getBlockX();
+        int baseY = anchor.getBlockY();
+        int baseZ = anchor.getBlockZ();
+
+        // Estimate total width (assume ~4 blocks per column with separators)
+        int columns = boardManager.getBoard().getColumns().size();
+        int estimatedWidth = columns * 4;
+        int baseX = anchorX - (estimatedWidth / 2);
+
+        player.sendMessage(Component.text("💥 Demolishing the board...")
+                .color(NamedTextColor.RED));
+
+        // Spawn TNT across the board area
+        for (int x = baseX; x < baseX + estimatedWidth; x += 3) {
+            Location tntLoc = new Location(world, x + 0.5, baseY + 1.5, baseZ + 0.5);
+            TNTPrimed tnt = world.spawn(tntLoc, TNTPrimed.class);
+            tnt.setFuseTicks(20 + ((x - baseX) * 3));
+        }
+
+        // Clear the board after explosions finish
+        final Location clearAnchor = new Location(world, baseX, baseY, baseZ);
+        Bukkit.getScheduler().runTaskLater(plugin, () -> {
+            boardSpawner.clearBoard(clearAnchor, estimatedWidth);
+            player.sendMessage(Component.text("✓ Board destroyed!")
+                    .color(NamedTextColor.GREEN));
+            player.playSound(player.getLocation(), Sound.ENTITY_GENERIC_EXPLODE, 1.0f, 1.0f);
+        }, 80L + (estimatedWidth * 3L));
+
         return true;
     }
 
@@ -299,10 +368,12 @@ public class JiraBoardCommand implements CommandExecutor, TabCompleter {
                 .append(Component.text(" - Setup guide").color(NamedTextColor.GRAY)));
         sender.sendMessage(Component.text("/jiraboard addcolumn <name> <jiraStatus>").color(NamedTextColor.YELLOW)
                 .append(Component.text(" - Add a status column").color(NamedTextColor.GRAY)));
-        sender.sendMessage(Component.text("/jiraboard spawn").color(NamedTextColor.YELLOW)
-                .append(Component.text(" - Spawn/create the Jira board in-world").color(NamedTextColor.GRAY)));
+        sender.sendMessage(Component.text("/jiraboard spawn [x y z]").color(NamedTextColor.YELLOW)
+                .append(Component.text(" - Spawn the Jira board (optional coords)").color(NamedTextColor.GRAY)));
         sender.sendMessage(Component.text("/jiraboard refresh").color(NamedTextColor.YELLOW)
                 .append(Component.text(" - Rebuild board with fresh Jira data").color(NamedTextColor.GRAY)));
+        sender.sendMessage(Component.text("/jiraboard delete").color(NamedTextColor.YELLOW)
+                .append(Component.text(" - Explode the board with TNT!").color(NamedTextColor.GRAY)));
         sender.sendMessage(Component.text(""));
         sender.sendMessage(Component.text("=== AI Commands (Phase 2) ===").color(NamedTextColor.LIGHT_PURPLE));
         sender.sendMessage(Component.text("/jiraboard setaihopper").color(NamedTextColor.YELLOW)
@@ -315,7 +386,7 @@ public class JiraBoardCommand implements CommandExecutor, TabCompleter {
     @Override
     public List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command, @NotNull String alias, @NotNull String[] args) {
         if (args.length == 1) {
-            return Arrays.asList("info", "setup", "spawn", "addcolumn", "refresh", "setaihopper", "aiinfo", "debug", "help");
+            return Arrays.asList("info", "setup", "spawn", "addcolumn", "refresh", "delete", "setaihopper", "aiinfo", "debug", "help");
         }
 
         if (args.length == 2 && args[0].equalsIgnoreCase("addcolumn")) {

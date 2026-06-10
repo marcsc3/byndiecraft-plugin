@@ -6,6 +6,7 @@ import com.bynder.byndiecraft.board.BoardManager;
 import com.bynder.byndiecraft.board.BoardSpawner;
 import com.bynder.byndiecraft.board.JiraBoard;
 import com.bynder.byndiecraft.commands.JiraBoardCommand;
+import com.bynder.byndiecraft.commands.StandupCommand;
 import com.bynder.byndiecraft.jira.JiraClient;
 import com.bynder.byndiecraft.listeners.ItemFrameListener;
 import com.bynder.byndiecraft.util.ConfigLoader;
@@ -31,7 +32,7 @@ public class ByndiecraftPlugin extends JavaPlugin {
         saveDefaultConfig();
 
         // Load configuration
-        configLoader = new ConfigLoader(getConfig(), getLogger());
+        configLoader = new ConfigLoader(getConfig(), getDataFolder(), getLogger());
 
         // Validate Jira credentials
         String jiraUrl = configLoader.getJiraUrl();
@@ -86,6 +87,12 @@ public class ByndiecraftPlugin extends JavaPlugin {
             jiraBoardCommand.setExecutor(commandExecutor);
             jiraBoardCommand.setTabCompleter(commandExecutor);
             getLogger().info("✓ Commands registered: /jiraboard");
+        }
+
+        PluginCommand standupCommand = getCommand("standup");
+        if (standupCommand != null) {
+            standupCommand.setExecutor(new StandupCommand(this, boardManager));
+            getLogger().info("✓ Commands registered: /standup");
         }
 
         // Print board status

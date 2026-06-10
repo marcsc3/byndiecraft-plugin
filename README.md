@@ -9,7 +9,7 @@ Byndiecraft allows you to visualize and interact with your Jira board directly i
 ### Features
 
 - ✅ **Auto Board Spawning**: Run `/jiraboard spawn` to build the entire board from live Jira data
-- ✅ **Visual Jira Board**: Dynamic columns with sign headers (To Do, In Progress, Done)
+- ✅ **Visual Jira Board**: Dynamic columns auto-created from ticket statuses
 - ✅ **Book-Based Tickets**: Written books auto-generated from Jira tickets
 - ✅ **Real-Time Sync**: Moving books triggers Jira API calls to update ticket status
 - ✅ **Instant Feedback**: Players receive chat messages on successful/failed updates
@@ -62,7 +62,7 @@ Byndiecraft allows you to visualize and interact with your Jira board directly i
      url: "https://bynder.atlassian.net"
      email: "your-email@bynder.com"
      api_token: "YOUR_API_TOKEN_HERE"
-     project_key: "TAP"
+     project_key: "SHARE"
    ```
 
    Or set environment variable before starting server:
@@ -89,9 +89,9 @@ Simply run the command in-game:
 This will:
 - Fetch all tickets from your Jira project
 - Build a backing wall with item frames at the configured anchor point
-- Place sign headers above each column (To Do, In Progress, Done)
+- Auto-create columns for every status found in your tickets
+- Place sign headers above each column
 - Create written books for each ticket and place them in the correct column
-- Columns grow dynamically based on ticket count (capped at 10 per column)
 
 ### 2. Configure the Anchor Point
 
@@ -115,7 +115,7 @@ If no anchor is configured, the board spawns at the player's current position.
 - Pick up a book from one column's item frame
 - Place it in a different column's item frame
 - Jira updates automatically!
-- You'll receive a chat message: `✓ TAP-123 moved to 'In Progress'`
+- You'll receive a chat message: `✓ SHARE-123 moved to 'In Progress'`
 
 ### 4. Refresh the Board
 
@@ -145,7 +145,7 @@ jira:
   url: "https://bynder.atlassian.net"
   email: "your-email@bynder.com"
   api_token: "${JIRA_API_TOKEN}"  # Environment variable or direct value
-  project_key: "TAP"
+  project_key: "SHARE"
 
 board:
   world: "world"
@@ -153,12 +153,20 @@ board:
     x: 100
     y: 64
     z: 200
+  # Pre-configured columns (optional — columns are also auto-created
+  # from ticket statuses found in Jira at spawn time)
   columns:
-    - name: "To Do"
-      jira_status_name: "To Do"
+    - name: "Ready to be Picked Up"
+      jira_status_name: "Ready to be Picked Up"
       frames: []
     - name: "In Progress"
       jira_status_name: "In Progress"
+      frames: []
+    - name: "Review"
+      jira_status_name: "Review"
+      frames: []
+    - name: "Merge"
+      jira_status_name: "Merge"
       frames: []
     - name: "Done"
       jira_status_name: "Done"
@@ -179,9 +187,9 @@ Stand where you want the board's top-left corner and press **F3** to see your co
 1. **Spawn the board**: Run `/jiraboard spawn` — watch the board build itself from live Jira data
 2. **Show the board**: Point out columns with sign headers and books with ticket details
 3. **Simulate stand-up**:
-   - Player 1: "I'm picking up TAP-302795" → moves book to "In Progress"
+   - Player 1: "I'm picking up SHARE-302795" → moves book to "In Progress"
    - Show browser with Jira board updating live
-   - Player 2: "I finished TAP-12783" → moves book to "Done"
+   - Player 2: "I finished SHARE-12783" → moves book to "Done"
    - Show browser update again
 4. **Refresh**: Run `/jiraboard refresh` to show it rebuilds with current state
 5. **Error handling**: Try invalid ticket key → see error message
@@ -214,7 +222,7 @@ Minecraft Server (Paper)
 - Add the token directly to `config.yml` (not recommended for production)
 
 ### "No valid Jira ticket key found"
-- Book title must contain a valid ticket key (e.g., `TAP-123`)
+- Book title must contain a valid ticket key (e.g., `SHARE-123`)
 - Format: `PROJECT-NUMBER`
 
 ### Enable Debug Mode

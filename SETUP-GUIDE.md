@@ -68,7 +68,7 @@ jira:
   url: "https://bynder.atlassian.net"
   email: "your.email@bynder.com"  # ← Change this
   api_token: "your_api_token_here"  # ← Paste your token
-  project_key: "TAP"
+  project_key: "SHARE"
 ```
 
 ### 5. Reload Plugin
@@ -171,15 +171,15 @@ You should see your board layout with all configured frames.
 
 ### 1. Get Real Jira Tickets
 
-Go to https://bynder.atlassian.net/projects/TAP and note some ticket keys (e.g., `TAP-123`, `TAP-456`).
+Go to https://bynder.atlassian.net/projects/SHARE and note some ticket keys (e.g., `SHARE-123`, `SHARE-456`).
 
 ### 2. Create Written Books
 
 In Minecraft:
 1. Craft a **Book and Quill** (book + feather + ink sac)
 2. Write the ticket key as the title:
-   - Format: `TAP-123: Brief summary`
-   - Or just: `TAP-123`
+   - Format: `SHARE-123: Brief summary`
+   - Or just: `SHARE-123`
 3. Click "Sign" (not "Sign and Close")
 4. This creates a **Written Book**
 
@@ -189,8 +189,8 @@ In Minecraft:
 
 - Right-click an item frame with a written book
 - The book appears in the frame
-- Check chat - you should see: `⏳ Updating TAP-123 to 'To Do'...`
-- Then: `✓ TAP-123 moved to 'To Do'`
+- Check chat - you should see: `⏳ Updating SHARE-123 to 'To Do'...`
+- Then: `✓ SHARE-123 moved to 'To Do'`
 
 ### 4. Move Books Between Columns
 
@@ -206,7 +206,7 @@ In Minecraft:
 
 1. **Invalid ticket key**
    - Make sure the ticket exists in your Jira project
-   - Format must be `PROJECT-NUMBER` (e.g., `TAP-123`)
+   - Format must be `PROJECT-NUMBER` (e.g., `SHARE-123`)
 
 2. **Permission denied**
    - You need permission to transition tickets in Jira
@@ -231,11 +231,11 @@ Make sure either:
 Book title must contain a valid ticket key matching the pattern `[A-Z]+-\d+`.
 
 Examples:
-- ✅ `TAP-123`
-- ✅ `TAP-123: Fix login bug`
-- ✅ `Working on TAP-456 today`
+- ✅ `SHARE-123`
+- ✅ `SHARE-123: Fix login bug`
+- ✅ `Working on SHARE-456 today`
 - ❌ `tap-123` (lowercase)
-- ❌ `TAP123` (missing dash)
+- ❌ `SHARE123` (missing dash)
 - ❌ `Just a note` (no ticket key)
 
 ### Enable Debug Mode
@@ -248,12 +248,12 @@ debug: true
 
 Restart the plugin, then check logs for:
 ```
-[Byndiecraft] Fetching issue: TAP-123
-[Byndiecraft] Issue fetched: TAP-123 - To Do
-[Byndiecraft] Fetching transitions for: TAP-123
+[Byndiecraft] Fetching issue: SHARE-123
+[Byndiecraft] Issue fetched: SHARE-123 - To Do
+[Byndiecraft] Fetching transitions for: SHARE-123
 [Byndiecraft]   Transition: In Progress (ID: 21)
 [Byndiecraft]   Transition: Done (ID: 31)
-[Byndiecraft] Transitioning TAP-123 with transition ID: 21
+[Byndiecraft] Transitioning SHARE-123 with transition ID: 21
 ```
 
 ## Demo Script (Hackathon Presentation)
@@ -261,7 +261,7 @@ Restart the plugin, then check logs for:
 ### Setup (Before Demo)
 1. ✅ Server running with plugin loaded
 2. ✅ Board built and configured
-3. ✅ 3-5 real Jira tickets ready (from TAP project)
+3. ✅ 3-5 real Jira tickets ready (from SHARE project)
 4. ✅ Books created with those ticket keys
 5. ✅ Browser open to Jira board view
 6. ✅ Screen sharing: Split screen (Minecraft + Jira)
@@ -277,23 +277,23 @@ Restart the plugin, then check logs for:
 - Point out the three columns (To Do, In Progress, Done)
 
 **3. Live Sync Demo (2 minutes)**
-- **Teammate 1:** "I'm starting work on TAP-123"
+- **Teammate 1:** "I'm starting work on SHARE-123"
   - Places book in "In Progress" frame
   - ✓ Success message appears
   - **Switch to browser** → Show Jira updated instantly
   
-- **Teammate 2:** "I finished TAP-456!"
+- **Teammate 2:** "I finished SHARE-456!"
   - Moves book to "Done" frame
   - ✓ Success message appears
   - **Switch to browser** → Show Jira updated
 
-- **You:** "TAP-789 is blocked"
+- **You:** "SHARE-789 is blocked"
   - (If you added a "Blocked" column) Move book there
   - Show update in Jira
 
 **4. Error Handling (30 seconds)**
-- Try to place a book with fake ticket (`TAP-9999`)
-- Show error message: `✗ Failed to update TAP-9999 in Jira`
+- Try to place a book with fake ticket (`SHARE-9999`)
+- Show error message: `✗ Failed to update SHARE-9999 in Jira`
 - Explain: "We validate tickets exist and handle errors gracefully"
 
 **5. Wrap Up (30 seconds)**
