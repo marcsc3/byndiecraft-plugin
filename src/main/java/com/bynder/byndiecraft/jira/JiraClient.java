@@ -12,6 +12,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 
@@ -22,6 +24,7 @@ public class JiraClient {
     private final Gson gson;
     private final Logger logger;
     private final boolean debugMode;
+    private final ExecutorService executor;
 
     public JiraClient(String baseUrl, String email, String apiToken, Logger logger, boolean debugMode) {
         this.baseUrl = baseUrl.endsWith("/") ? baseUrl.substring(0, baseUrl.length() - 1) : baseUrl;
@@ -39,6 +42,15 @@ public class JiraClient {
                 .readTimeout(15, TimeUnit.SECONDS)
                 .writeTimeout(15, TimeUnit.SECONDS)
                 .build();
+
+        // Use a thread factory that inherits the plugin classloader
+        ClassLoader pluginClassLoader = this.getClass().getClassLoader();
+        this.executor = Executors.newCachedThreadPool(r -> {
+            Thread t = new Thread(r);
+            t.setContextClassLoader(pluginClassLoader);
+            t.setDaemon(true);
+            return t;
+        });
 
         if (debugMode) {
             logger.info("JiraClient initialized for: " + baseUrl);
@@ -85,7 +97,7 @@ public class JiraClient {
                 logger.severe("Error fetching issue " + issueKey + ": " + e.getMessage());
                 return null;
             }
-        });
+        }, executor);
     }
 
     public CompletableFuture<Map<String, String>> getTransitions(String issueKey) {
@@ -131,7 +143,7 @@ public class JiraClient {
                 logger.severe("Error fetching transitions for " + issueKey + ": " + e.getMessage());
                 return new HashMap<>();
             }
-        });
+        }, executor);
     }
 
     public CompletableFuture<Boolean> transitionIssue(String issueKey, String targetStatusName) {
@@ -190,7 +202,7 @@ public class JiraClient {
                 logger.severe("Error transitioning issue " + issueKey + ": " + e.getMessage());
                 return false;
             }
-        });
+        }, executor);
     }
 
     public CompletableFuture<List<JiraTicket>> searchIssues(String projectKey) {
@@ -280,7 +292,7 @@ public class JiraClient {
                 logger.severe("Error searching issues: " + e.getMessage());
                 return new ArrayList<>();
             }
-        });
+        }, executor);
     }
 
     private String extractTextFromAdf(JsonObject adf) {
@@ -309,6 +321,7 @@ public class JiraClient {
     }
 
     public void shutdown() {
+        executor.shutdown();
         httpClient.dispatcher().executorService().shutdown();
         httpClient.connectionPool().evictAll();
     }
