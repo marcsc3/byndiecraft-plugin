@@ -115,7 +115,7 @@ Elevator music plays while you wait.
 
 ## The World
 
-The board lives inside a custom-built feudal Japanese town — a ceremonial plaza surrounded by houses, walking paths, and a five-tier pagoda (the "GitHub Tower"). The entire world is generated from a datapack with 17 mcfunction files. It's not just a board floating in space; it's a place your team gathers for standup.
+The board lives inside a custom-built feudal Japanese town — a ceremonial plaza surrounded by houses, walking paths, and a five-tier pagoda (the "MCP Tower"). The entire world is generated from a datapack with 17 mcfunction files. It's not just a board floating in space; it's a place your team gathers for standup.
 
 Run `/standup` and all online players teleport to the board in a semicircle, ready to discuss the sprint.
 
