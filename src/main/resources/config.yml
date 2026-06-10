@@ -23,9 +23,9 @@ board:
   # Fixed anchor point where the board spawns (top-left corner)
   # If not set, /jiraboard spawn uses the player's current location
   anchor:
-    x: 0
-    y: -62
-    z: -15
+    x: -8
+    y: -60
+    z: -10
 
   # Status columns configuration
   # "name" is displayed on the Minecraft sign; "jira_status_name" must match the API status
@@ -94,6 +94,9 @@ ai:
 
     # Repo determination strategy
     auto_detect: true  # Let Claude decide from ticket
+
+  # Play elevator music while AI is working on a ticket
+  elevator_music: true
 
   # Visual feedback
   visual_effects: true

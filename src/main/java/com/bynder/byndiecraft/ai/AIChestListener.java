@@ -29,6 +29,7 @@ public class AIChestListener implements Listener {
     private final ByndiecraftPlugin plugin;
     private final AITaskManager aiTaskManager;
     private Location aiHopperLocation;
+    private ElevatorMusicPlayer elevatorMusic;
 
     public AIChestListener(ByndiecraftPlugin plugin, AITaskManager aiTaskManager) {
         this.plugin = plugin;
@@ -226,6 +227,12 @@ public class AIChestListener implements Listener {
 
         plugin.getLogger().info(String.format("[AIHopper] Starting AI task for ticket: %s", ticketKey));
 
+        // Start elevator music while MCP is working
+        if (plugin.getConfig().getBoolean("ai.elevator_music", true)) {
+            elevatorMusic = new ElevatorMusicPlayer();
+            elevatorMusic.start(plugin, aiHopperLocation.clone().add(0.5, 1, 0.5));
+        }
+
         // Trigger AI task asynchronously
         aiTaskManager.implementTicket(player, ticketKey, book).thenAccept(result -> {
             // Schedule callback on main thread
@@ -236,6 +243,11 @@ public class AIChestListener implements Listener {
     }
 
     private void handleAIResult(Player player, ItemStack book, PRResult result) {
+        if (elevatorMusic != null) {
+            elevatorMusic.stop();
+            elevatorMusic = null;
+        }
+
         if (result.isSuccess()) {
             // Success - return book with PR link
             if (plugin.getConfig().getBoolean("ai.return_book_on_completion", true)) {
