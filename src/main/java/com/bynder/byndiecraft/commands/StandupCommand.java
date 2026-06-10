@@ -43,17 +43,11 @@ public class StandupCommand implements CommandExecutor {
             return true;
         }
 
-        int columnCount = boardManager.getBoard().getColumns().size();
-        int boardWidth = (columnCount - 1) * COLUMN_SPACING + COLUMN_WIDTH;
-        double centerX = anchor.getBlockX() + boardWidth / 2.0;
-        double viewZ = anchor.getBlockZ() + VIEWING_DISTANCE;
-        double viewY = anchor.getBlockY();
-
         int playerCount = players.size();
         int i = 0;
         for (Player player : players) {
-            double offsetX = centerX - (playerCount - 1) / 2.0 + i;
-            Location dest = new Location(anchor.getWorld(), offsetX, viewY, viewZ, 180f, 0f);
+            double offsetX = -8 + i - (playerCount - 1) / 2.0;
+            Location dest = new Location(anchor.getWorld(), offsetX, -60, -6, 180f, 0f);
             player.teleport(dest);
             player.playSound(dest, Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1.0f, 1.0f);
             i++;
