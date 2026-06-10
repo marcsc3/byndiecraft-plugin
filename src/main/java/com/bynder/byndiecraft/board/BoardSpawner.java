@@ -90,14 +90,14 @@ public class BoardSpawner {
                 .filter(e -> {
                     Location loc = e.getLocation();
                     return loc.getBlockX() >= startX - 1 && loc.getBlockX() < startX + totalWidth + 1
-                            && loc.getBlockY() >= startY + 1 && loc.getBlockY() <= startY + MAX_HEIGHT + 6
+                            && loc.getBlockY() >= startY && loc.getBlockY() <= startY + 5
                             && Math.abs(loc.getBlockZ() - startZ) <= 2;
                 })
                 .forEach(e -> e.remove());
 
-        // Clear board structure without dropping items (start from baseY+1 to not destroy ground)
+        // Clear board structure without dropping items (from panel level up to roof)
         for (int x = startX - 1; x < startX + totalWidth + 1; x++) {
-            for (int y = startY + 1; y <= startY + 6; y++) {
+            for (int y = startY; y <= startY + 5; y++) {
                 for (int dz = 1; dz >= -2; dz--) {
                     Block block = world.getBlockAt(x, y, startZ + dz);
                     if (block.getType() != Material.AIR) {
@@ -144,13 +144,13 @@ public class BoardSpawner {
 
         clearBoard(new Location(world, baseX, baseY, baseZ), totalWidth);
 
-        // Board layout (anchor y=-61):
-        // baseY+1 (y=-60): spruce plank floor + stone_bricks pillar bases
-        // baseY+2 to baseY+5 (y=-59 to -56): terracotta panels + item frames
-        // baseY+6 (y=-55): dark oak stairs roof + signs
-        int panelBottom = baseY + 2;
-        int panelTop = baseY + 5;
-        int roofY = baseY + 6;
+        // Board layout (anchor y=-59, ground at y=-60):
+        // baseY-1 (y=-60): spruce plank floor + stone_bricks pillar bases
+        // baseY to baseY+3 (y=-59 to -56): terracotta panels + item frames
+        // baseY+4 (y=-55): dark oak stairs roof + signs
+        int panelBottom = baseY;
+        int panelTop = baseY + 3;
+        int roofY = baseY + 4;
 
         int currentX = baseX;
 
@@ -221,10 +221,10 @@ public class BoardSpawner {
             }
         }
 
-        // Spruce plank floor at baseY+1 along baseZ and baseZ+1
+        // Spruce plank floor at baseY-1 (ground level)
         for (int x = baseX - 1; x <= baseX + totalWidth; x++) {
-            world.getBlockAt(x, baseY + 1, baseZ).setType(Material.SPRUCE_PLANKS);
-            world.getBlockAt(x, baseY + 1, baseZ + 1).setType(Material.SPRUCE_PLANKS);
+            world.getBlockAt(x, baseY - 1, baseZ).setType(Material.SPRUCE_PLANKS);
+            world.getBlockAt(x, baseY - 1, baseZ + 1).setType(Material.SPRUCE_PLANKS);
         }
 
         // Dark oak stairs roof
@@ -237,10 +237,10 @@ public class BoardSpawner {
             stair.setBlockData(stairData);
         }
 
-        // End pillars — stone bricks
+        // End pillars — stone bricks from floor to panel top
         int leftPillarX = baseX - 1;
         int rightPillarX = baseX + totalWidth;
-        for (int y = baseY + 1; y <= panelTop; y++) {
+        for (int y = baseY - 1; y <= panelTop; y++) {
             world.getBlockAt(leftPillarX, y, baseZ - 1).setType(Material.STONE_BRICKS);
             world.getBlockAt(rightPillarX, y, baseZ - 1).setType(Material.STONE_BRICKS);
         }
