@@ -90,15 +90,15 @@ public class BoardSpawner {
                 .filter(e -> {
                     Location loc = e.getLocation();
                     return loc.getBlockX() >= startX - 1 && loc.getBlockX() < startX + totalWidth + 1
-                            && loc.getBlockY() >= startY && loc.getBlockY() <= startY + MAX_HEIGHT + 2
+                            && loc.getBlockY() >= startY + 1 && loc.getBlockY() <= startY + MAX_HEIGHT + 6
                             && Math.abs(loc.getBlockZ() - startZ) <= 2;
                 })
                 .forEach(e -> e.remove());
 
-        // Clear board structure without dropping items
+        // Clear board structure without dropping items (start from baseY+1 to not destroy ground)
         for (int x = startX - 1; x < startX + totalWidth + 1; x++) {
-            for (int y = startY; y <= startY + MAX_HEIGHT + 2; y++) {
-                for (int dz = 1; dz >= -1; dz--) {
+            for (int y = startY + 1; y <= startY + 6; y++) {
+                for (int dz = 1; dz >= -2; dz--) {
                     Block block = world.getBlockAt(x, y, startZ + dz);
                     if (block.getType() != Material.AIR) {
                         block.setType(Material.AIR, false);
@@ -138,12 +138,19 @@ public class BoardSpawner {
         }
 
         int anchorX = anchor.getBlockX();
-        int baseX = anchorX - (totalWidth / 2); // center the board on anchor X
+        int baseX = anchorX - (totalWidth / 2);
         int baseY = anchor.getBlockY();
         int baseZ = anchor.getBlockZ();
 
         clearBoard(new Location(world, baseX, baseY, baseZ), totalWidth);
-        int topY = baseY + MAX_HEIGHT - 1; // 4 rows: baseY, baseY+1, baseY+2, baseY+3
+
+        // Board layout (anchor y=-61):
+        // baseY+1 (y=-60): spruce plank floor + stone_bricks pillar bases
+        // baseY+2 to baseY+5 (y=-59 to -56): terracotta panels + item frames
+        // baseY+6 (y=-55): dark oak stairs roof + signs
+        int panelBottom = baseY + 2;
+        int panelTop = baseY + 5;
+        int roofY = baseY + 6;
 
         int currentX = baseX;
 
@@ -154,18 +161,17 @@ public class BoardSpawner {
             List<JiraTicket> columnTickets = ticketsByStatus.getOrDefault(column.getJiraStatusName().toLowerCase(), Collections.emptyList());
             int ticketCount = columnTickets.size();
 
-            // Backing wall — terracotta, fixed height
+            // Backing wall — terracotta at z-1 (baseZ-1)
             Material wallMaterial = COLUMN_COLORS[colIdx % COLUMN_COLORS.length];
-            for (int y = baseY; y <= topY; y++) {
+            for (int y = panelBottom; y <= panelTop; y++) {
                 for (int dx = 0; dx < colWidth; dx++) {
-                    Block backing = world.getBlockAt(currentX + dx, y, baseZ - 1);
-                    backing.setType(wallMaterial);
+                    world.getBlockAt(currentX + dx, y, baseZ - 1).setType(wallMaterial);
                 }
             }
 
-            // Column header sign at the top center
+            // Column header sign at roof level
             int signX = currentX + (colWidth / 2);
-            Block signBlock = world.getBlockAt(signX, topY + 1, baseZ);
+            Block signBlock = world.getBlockAt(signX, roofY, baseZ);
             signBlock.setType(Material.OAK_WALL_SIGN);
             org.bukkit.block.data.type.WallSign signData =
                     (org.bukkit.block.data.type.WallSign) signBlock.getBlockData();
@@ -178,7 +184,7 @@ public class BoardSpawner {
             }
 
             // Backing behind the sign
-            world.getBlockAt(signX, topY + 1, baseZ - 1).setType(wallMaterial);
+            world.getBlockAt(signX, roofY, baseZ - 1).setType(wallMaterial);
 
             column.getFrameLocations().forEach(column::removeFrameLocation);
 
@@ -186,7 +192,7 @@ public class BoardSpawner {
             int ticketIdx = 0;
             for (int dx = 0; dx < colWidth; dx++) {
                 for (int row = 0; row < MAX_HEIGHT; row++) {
-                    int frameY = baseY + (MAX_HEIGHT - 1 - row); // top to bottom
+                    int frameY = panelTop - row;
                     Location frameLoc = new Location(world, currentX + dx, frameY, baseZ);
 
                     ItemFrame frame = (ItemFrame) world.spawnEntity(frameLoc, EntityType.ITEM_FRAME);
@@ -208,20 +214,22 @@ public class BoardSpawner {
 
             // Separator: stripped oak log pillar between columns
             if (colIdx < columns.size() - 1) {
-                for (int y = baseY; y <= topY; y++) {
+                for (int y = panelBottom; y <= panelTop; y++) {
                     world.getBlockAt(currentX, y, baseZ - 1).setType(Material.STRIPPED_OAK_LOG);
                 }
-                // Chain + lantern hanging from top
-                world.getBlockAt(currentX, topY + 1, baseZ - 1).setType(Material.STRIPPED_OAK_LOG);
-                world.getBlockAt(currentX, topY, baseZ).setType(Material.CHAIN);
-                world.getBlockAt(currentX, topY - 1, baseZ).setType(Material.LANTERN);
                 currentX += SEPARATOR_WIDTH;
             }
         }
 
-        // Overhang roof — stair blocks facing outward for a natural eave
+        // Spruce plank floor at baseY+1 along baseZ and baseZ+1
+        for (int x = baseX - 1; x <= baseX + totalWidth; x++) {
+            world.getBlockAt(x, baseY + 1, baseZ).setType(Material.SPRUCE_PLANKS);
+            world.getBlockAt(x, baseY + 1, baseZ + 1).setType(Material.SPRUCE_PLANKS);
+        }
+
+        // Dark oak stairs roof
         for (int x = baseX; x < baseX + totalWidth; x++) {
-            Block stair = world.getBlockAt(x, topY + 1, baseZ - 1);
+            Block stair = world.getBlockAt(x, roofY, baseZ - 1);
             stair.setType(Material.DARK_OAK_STAIRS);
             org.bukkit.block.data.type.Stairs stairData = (org.bukkit.block.data.type.Stairs) stair.getBlockData();
             stairData.setFacing(BlockFace.SOUTH);
@@ -229,15 +237,13 @@ public class BoardSpawner {
             stair.setBlockData(stairData);
         }
 
-        // End pillars — stone brick columns with torches
+        // End pillars — stone bricks
         int leftPillarX = baseX - 1;
         int rightPillarX = baseX + totalWidth;
-        for (int y = baseY; y <= topY + 1; y++) {
+        for (int y = baseY + 1; y <= panelTop; y++) {
             world.getBlockAt(leftPillarX, y, baseZ - 1).setType(Material.STONE_BRICKS);
             world.getBlockAt(rightPillarX, y, baseZ - 1).setType(Material.STONE_BRICKS);
         }
-        world.getBlockAt(leftPillarX, topY + 1, baseZ).setType(Material.WALL_TORCH);
-        world.getBlockAt(rightPillarX, topY + 1, baseZ).setType(Material.WALL_TORCH);
 
     }
 
