@@ -179,13 +179,26 @@ public class AIChestListener implements Listener {
     private void processBook(Player player, ItemStack book) {
         // Extract ticket key from book title
         BookMeta bookMeta = (BookMeta) book.getItemMeta();
-        if (bookMeta == null || !bookMeta.hasTitle()) {
-            player.sendMessage(Component.text("⚠ Book must have a title with a Jira ticket key (e.g., TAP-123)")
+        if (bookMeta == null) {
+            player.sendMessage(Component.text("⚠ Book must have a title with a Jira ticket key (e.g., SHARE-123)")
                     .color(NamedTextColor.YELLOW));
             return;
         }
 
         String bookTitle = bookMeta.getTitle();
+        if (bookTitle == null || bookTitle.isEmpty()) {
+            var displayName = bookMeta.displayName();
+            if (displayName != null) {
+                bookTitle = net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer.plainText().serialize(displayName);
+            }
+        }
+
+        if (bookTitle == null || bookTitle.isEmpty()) {
+            player.sendMessage(Component.text("⚠ Book must have a title with a Jira ticket key (e.g., SHARE-123)")
+                    .color(NamedTextColor.YELLOW));
+            return;
+        }
+
         Optional<String> ticketKeyOpt = BookParser.extractTicketKey(bookTitle);
 
         if (ticketKeyOpt.isEmpty()) {
