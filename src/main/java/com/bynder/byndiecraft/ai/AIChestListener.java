@@ -11,10 +11,13 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Particle;
 import org.bukkit.Sound;
+import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryMoveItemEvent;
+import org.bukkit.event.inventory.InventoryPickupItemEvent;
+import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.BookMeta;
 
@@ -64,6 +67,47 @@ public class AIChestListener implements Listener {
 
     public Location getAIHopperLocation() {
         return aiHopperLocation;
+    }
+
+    @EventHandler
+    public void onHopperPickupItem(InventoryPickupItemEvent event) {
+        if (!plugin.getConfig().getBoolean("ai.enabled", false)) {
+            return;
+        }
+
+        if (aiHopperLocation == null) {
+            return;
+        }
+
+        if (event.getInventory().getType() != InventoryType.HOPPER) {
+            return;
+        }
+
+        Location hopperLoc = event.getInventory().getLocation();
+        if (hopperLoc == null || !isAIHopper(hopperLoc)) {
+            return;
+        }
+
+        Item droppedItem = event.getItem();
+        ItemStack item = droppedItem.getItemStack();
+        if (item.getType() != Material.WRITTEN_BOOK) {
+            return;
+        }
+
+        plugin.getLogger().info("[AIHopper] Book picked up by AI hopper (dropped item)");
+
+        event.setCancelled(true);
+        droppedItem.remove();
+
+        Bukkit.getScheduler().runTask(plugin, () -> {
+            Player player = findNearbyPlayer(hopperLoc);
+            if (player == null) {
+                plugin.getLogger().warning("[AIHopper] No player found near hopper, cannot process book");
+                return;
+            }
+
+            processBook(player, item.clone());
+        });
     }
 
     @EventHandler
