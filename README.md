@@ -14,28 +14,23 @@ Byndiecraft transforms Minecraft into a fully functional Jira board. Tickets fro
 
 ### Phase 1: The Living Jira Board
 
-A single command (`/jiraboard spawn`) connects to Jira's REST API v3, runs a JQL query against the active sprint, and builds a physical board in the Minecraft world.
+A single command (`/jiraboard spawn`) pulls your active sprint from Jira and builds a physical board in the Minecraft world.
 
 **Board Generation:**
-- The plugin authenticates with Jira using email + API token (Basic Auth over HTTPS)
-- Fetches all tickets in the active sprint via JQL: `sprint in openSprints() AND project = <KEY>`
-- For each ticket, generates a written book — title = ticket key + summary, pages = full description (multi-page support)
+- Connects to Jira REST API v3 and fetches all tickets in the current sprint
+- Each ticket becomes a written book — title shows the ticket key + summary, pages contain the full description
 - Books are **color-coded** by issue type: red = bug, green = story, aqua = task/subtask, gold = spike
-- Places books in item frames on colored terracotta columns (one column per status)
-- Columns auto-size their width based on ticket count (max 4 rows per column)
+- Placed in item frames on colored terracotta columns (one column per status)
+- Columns auto-size their width based on ticket count
 
-**Real-Time Jira Sync (the core mechanic):**
-- `ItemFrameListener` hooks into Paper's `PlayerInteractEntityEvent`
-- When a player places a book in a frame, the plugin extracts the ticket key via regex (`[A-Z]+-\d+`)
-- The frame's world coordinates are mapped to a status column via `BoardManager` (frame location → column lookup)
-- The plugin calls `GET /rest/api/3/issue/{key}/transitions` to fetch available Jira transitions
-- Matches the target column's Jira status name against available transitions
-- Fires `POST /rest/api/3/issue/{key}/transitions` with the matched transition ID
-- All HTTP calls use **OkHttp with CompletableFuture** — fully async, zero server tick lag
-- Duplicate transitions are prevented: the plugin caches current ticket status and skips if the book is just being rotated in place
-- On success: chat confirmation + sound effect. On "Done"/"Closed": fireworks with configurable colors, trails, and effects
+**Real-Time Jira Sync:**
+- Move a book to a different column and the plugin detects the new position
+- It identifies which Jira ticket the book represents and which status column it landed in
+- Calls the Jira Transitions API to move the ticket to the matching status — all asynchronously so the game never lags
+- Duplicate transitions are prevented (rotating a book in place doesn't re-trigger)
+- On success: chat confirmation + sound effect. On "Done": fireworks launch
 
-**Columns → Jira Status Mapping (configurable in YAML):**
+**Status Columns (configurable):**
 ```
 Ready to be Picked Up  →  Backlog
 In Progress            →  In Progress
