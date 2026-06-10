@@ -47,7 +47,7 @@ public class StandupCommand implements CommandExecutor {
         int i = 0;
         for (Player player : players) {
             double offsetX = -8 + i - (playerCount - 1) / 2.0;
-            Location dest = new Location(anchor.getWorld(), offsetX, -60, -6, 180f, 0f);
+            Location dest = new Location(anchor.getWorld(), offsetX, -60, 0, 180f, 0f);
             player.teleport(dest);
             player.playSound(dest, Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1.0f, 1.0f);
             i++;
