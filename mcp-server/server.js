@@ -279,10 +279,14 @@ function createBranchAndCommit(workDir, ticketKey, commitMessage) {
     console.log('[MCP] Creating commit...');
     const fullCommitMessage = `${commitMessage}\n\nImplemented by Claude AI via Byndiecraft\n\nCo-Authored-By: Claude Sonnet 4.5 <noreply@anthropic.com>`;
 
-    execSync(`git commit -m "${fullCommitMessage.replace(/"/g, '\\"')}"`, {
+    // Write commit message to a temp file to avoid shell escaping issues
+    const commitMsgFile = path.join(workDir, '.commit-msg');
+    fs.writeFileSync(commitMsgFile, fullCommitMessage);
+    execSync(`git commit -F .commit-msg`, {
         cwd: workDir,
         stdio: 'pipe'
     });
+    fs.unlinkSync(commitMsgFile);
 
     console.log('[MCP] ✓ Commit created');
 }

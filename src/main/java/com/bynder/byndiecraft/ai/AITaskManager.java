@@ -12,6 +12,7 @@ import org.bukkit.inventory.ItemStack;
 
 import java.io.IOException;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
 
 public class AITaskManager {
     private final ByndiecraftPlugin plugin;
@@ -23,7 +24,11 @@ public class AITaskManager {
     public AITaskManager(ByndiecraftPlugin plugin, JiraClient jiraClient) {
         this.plugin = plugin;
         this.jiraClient = jiraClient;
-        this.httpClient = new OkHttpClient();
+        this.httpClient = new OkHttpClient.Builder()
+                .connectTimeout(30, TimeUnit.SECONDS)
+                .readTimeout(120, TimeUnit.SECONDS)
+                .writeTimeout(30, TimeUnit.SECONDS)
+                .build();
         this.gson = new Gson();
         this.mcpEndpoint = plugin.getConfig().getString("ai.mcp_endpoint", "http://localhost:3000/implement-ticket");
     }
