@@ -1,16 +1,15 @@
 #!/bin/bash
 set -e
 
-SERVER_DIR="/minecraft"
+SERVER_DIR="../"
 WORLD_DIR="$SERVER_DIR/world"
 PLUGINS_DIR="$SERVER_DIR/plugins"
 DATAPACK_DEST="$WORLD_DIR/datapacks/byndiecraft"
 
-echo "Building plugin..."
-mvn package -q -DskipTests
-
-echo "Deploying JAR..."
-cp target/byndiecraft-plugin-*-SNAPSHOT.jar "$PLUGINS_DIR/"
+cd /home/ubuntu/minecraft/byndiecraft-plugin
+git pull
+mvn clean package
+cp target/byndiecraft-plugin-1.0.0-SNAPSHOT.jar "$PLUGINS_DIR/"
 
 echo "Deploying data-pack..."
 rm -rf "$DATAPACK_DEST"
