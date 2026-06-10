@@ -21,3 +21,6 @@ fill ~-55 ~11 ~61 ~55 ~20 ~125 air
 fill ~-55 ~21 ~-45 ~55 ~30 ~0 air
 fill ~-55 ~21 ~1 ~55 ~30 ~60 air
 fill ~-55 ~21 ~61 ~55 ~30 ~125 air
+
+# Clear sky area for Ronaldo cloud face (y=50 to y=110, z=40 plane)
+fill ~-25 ~50 ~40 ~25 ~110 ~40 air

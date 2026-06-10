@@ -16,5 +16,6 @@ execute positioned 0 -60 0 run function byndiecraft:plaza
 execute positioned 0 -60 0 run function byndiecraft:github_tower
 execute positioned 0 -60 0 run function byndiecraft:paths
 execute positioned 0 -60 0 run function byndiecraft:decorations
+execute positioned 0 -60 0 run function byndiecraft:ronaldo_cloud
 
 say Byndiecraft Town is ready! Welcome home.
