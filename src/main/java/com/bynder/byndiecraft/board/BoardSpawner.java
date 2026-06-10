@@ -45,23 +45,23 @@ public class BoardSpawner {
     public void spawn(CommandSender sender, Location anchor) {
         String projectKey = plugin.getConfigLoader().getProjectKey();
 
-        sender.sendMessage(Component.text("⏳ Fetching tickets from Jira project " + projectKey + "...")
+        Bukkit.broadcast(Component.text("⏳ Fetching tickets from Jira project " + projectKey + "...")
                 .color(NamedTextColor.GRAY));
 
         jiraClient.searchIssues(projectKey).thenAccept(tickets -> {
             Bukkit.getScheduler().runTask(plugin, () -> {
                 if (tickets.isEmpty()) {
-                    sender.sendMessage(Component.text("⚠ No tickets found in project " + projectKey)
+                    Bukkit.broadcast(Component.text("⚠ No tickets found in project " + projectKey)
                             .color(NamedTextColor.YELLOW));
                     return;
                 }
 
-                sender.sendMessage(Component.text("⏳ Building board with " + tickets.size() + " tickets...")
+                Bukkit.broadcast(Component.text("⏳ Building board with " + tickets.size() + " tickets...")
                         .color(NamedTextColor.GRAY));
 
                 buildBoard(anchor, tickets);
 
-                sender.sendMessage(Component.text("✓ Board spawned with " + tickets.size() + " tickets!")
+                Bukkit.broadcast(Component.text("✓ Board spawned with " + tickets.size() + " tickets!")
                         .color(NamedTextColor.GREEN));
                 if (sender instanceof Player player) {
                     player.playSound(player.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 1.0f, 1.0f);
@@ -69,7 +69,7 @@ public class BoardSpawner {
             });
         }).exceptionally(throwable -> {
             Bukkit.getScheduler().runTask(plugin, () -> {
-                sender.sendMessage(Component.text("✗ Error fetching tickets: " + throwable.getMessage())
+                Bukkit.broadcast(Component.text("✗ Error fetching tickets: " + throwable.getMessage())
                         .color(NamedTextColor.RED));
             });
             return null;
