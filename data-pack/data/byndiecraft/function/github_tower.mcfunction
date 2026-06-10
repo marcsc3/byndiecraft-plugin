@@ -5,8 +5,8 @@
 # Foundation (31x31 polished deepslate)
 fill ~17 ~-1 ~-19 ~47 ~-1 ~11 polished_deepslate
 
-# Platform floor (29x29 white concrete)
-fill ~18 ~0 ~-18 ~46 ~0 ~10 white_concrete
+# Platform floor (29x29 light blue concrete - Bynder brand background)
+fill ~18 ~0 ~-18 ~46 ~0 ~10 light_blue_concrete
 
 # Floor border (gray concrete frame)
 fill ~18 ~0 ~-18 ~46 ~0 ~-18 gray_concrete
