@@ -293,7 +293,11 @@ function createBranchAndCommit(workDir, ticketKey, commitMessage) {
 
 // Push branch and create PR using gh CLI
 async function createPullRequest(workDir, ticketKey, ticketSummary, jiraUrl, playerName) {
-    const branchName = `${ticketKey.toLowerCase()}-ai-implementation`;
+    const timestamp = Date.now().toString(36);
+    const branchName = `${ticketKey.toLowerCase()}-ai-${timestamp}`;
+
+    // Rename the local branch to the unique name
+    execSync(`git branch -m ${branchName}`, { cwd: workDir, stdio: 'pipe' });
 
     console.log(`[MCP] Pushing branch ${branchName}...`);
     try {

@@ -6,11 +6,17 @@ import com.bynder.byndiecraft.ai.models.PRResult;
 import com.bynder.byndiecraft.jira.JiraClient;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import okhttp3.*;
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.BookMeta;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
@@ -37,6 +43,7 @@ public class AITaskManager {
         return CompletableFuture.supplyAsync(() -> {
             try {
                 plugin.getLogger().info(String.format("[AITask] Starting implementation for ticket: %s", ticketKey));
+                sendProgress(player, "📖 Reading ticket details from Jira...", NamedTextColor.GRAY);
 
                 // 1. Fetch full ticket details from Jira
                 com.bynder.byndiecraft.jira.JiraTicket jiraTicketResult = jiraClient.getIssue(ticketKey).join();
@@ -46,14 +53,29 @@ public class AITaskManager {
                 }
 
                 String summary = jiraTicketResult.getSummary();
-                // Note: JiraClient's JiraTicket doesn't have description, we'll need to get it separately
-                // For now, use summary as description
-                String description = summary;
-                String jiraUrl = plugin.getConfig().getString("jira.url") + "/browse/" + ticketKey;
+                String description = jiraTicketResult.getDescription();
 
+                // Also extract text from book pages (contains description + any extra context)
+                if ((description == null || description.isEmpty()) && book.getItemMeta() instanceof BookMeta bookMeta) {
+                    StringBuilder bookContent = new StringBuilder();
+                    List<Component> pages = bookMeta.pages();
+                    for (int i = 1; i < pages.size(); i++) { // skip page 0 (title/status info)
+                        bookContent.append(PlainTextComponentSerializer.plainText().serialize(pages.get(i)));
+                        bookContent.append("\n");
+                    }
+                    description = bookContent.toString().trim();
+                }
+
+                if (description == null || description.isEmpty()) {
+                    description = summary;
+                }
+
+                String jiraUrl = plugin.getConfig().getString("jira.url") + "/browse/" + ticketKey;
                 JiraTicket ticket = new JiraTicket(ticketKey, summary, description, jiraUrl);
 
-                plugin.getLogger().info(String.format("[AITask] Ticket details: %s - %s", ticketKey, summary));
+                plugin.getLogger().info(String.format("[AITask] Ticket: %s - %s", ticketKey, summary));
+                plugin.getLogger().info(String.format("[AITask] Description: %s", description));
+                sendProgress(player, "🧠 Sending to Claude for implementation...", NamedTextColor.LIGHT_PURPLE);
 
                 // 2. Call MCP endpoint
                 JsonObject payload = new JsonObject();
@@ -90,6 +112,7 @@ public class AITaskManager {
                         String resultSummary = result.has("summary") ? result.get("summary").getAsString() : "Implementation complete";
 
                         plugin.getLogger().info(String.format("[AITask] Success! PR created: %s", prUrl));
+                        sendProgress(player, "✅ PR created successfully!", NamedTextColor.GREEN);
                         return PRResult.success(prUrl, resultSummary);
                     } else {
                         String error = result.has("error") ? result.get("error").getAsString() : "Unknown error";
@@ -107,6 +130,12 @@ public class AITaskManager {
                 e.printStackTrace();
                 return PRResult.failure("Unexpected error: " + e.getMessage());
             }
+        });
+    }
+
+    private void sendProgress(Player player, String message, NamedTextColor color) {
+        Bukkit.getScheduler().runTask(plugin, () -> {
+            player.sendMessage(Component.text(message).color(color));
         });
     }
 }
