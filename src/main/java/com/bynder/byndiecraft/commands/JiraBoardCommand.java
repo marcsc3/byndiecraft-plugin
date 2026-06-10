@@ -225,31 +225,31 @@ public class JiraBoardCommand implements CommandExecutor, TabCompleter {
         World world = anchor.getWorld();
         if (world == null) return true;
 
-        int columns = boardManager.getBoard().getColumns().size();
         int baseX = anchor.getBlockX();
         int baseY = anchor.getBlockY();
         int baseZ = anchor.getBlockZ();
+
+        // Estimate total width (assume ~4 blocks per column with separators)
+        int columns = boardManager.getBoard().getColumns().size();
+        int estimatedWidth = columns * 4;
 
         player.sendMessage(Component.text("💥 Demolishing the board...")
                 .color(NamedTextColor.RED));
 
         // Spawn TNT across the board area
-        for (int col = 0; col < columns; col++) {
-            int colX = baseX + (col * 4);
-            for (int y = baseY + 1; y >= baseY - 10; y -= 3) {
-                Location tntLoc = new Location(world, colX + 0.5, y + 0.5, baseZ + 0.5);
-                TNTPrimed tnt = world.spawn(tntLoc, TNTPrimed.class);
-                tnt.setFuseTicks(20 + (col * 10));
-            }
+        for (int x = baseX; x < baseX + estimatedWidth; x += 3) {
+            Location tntLoc = new Location(world, x + 0.5, baseY + 1.5, baseZ + 0.5);
+            TNTPrimed tnt = world.spawn(tntLoc, TNTPrimed.class);
+            tnt.setFuseTicks(20 + ((x - baseX) * 3));
         }
 
         // Clear the board after explosions finish
         Bukkit.getScheduler().runTaskLater(plugin, () -> {
-            boardSpawner.clearBoard(anchor, columns, 10);
+            boardSpawner.clearBoard(anchor, estimatedWidth);
             player.sendMessage(Component.text("✓ Board destroyed!")
                     .color(NamedTextColor.GREEN));
             player.playSound(player.getLocation(), Sound.ENTITY_GENERIC_EXPLODE, 1.0f, 1.0f);
-        }, 80L + (columns * 10L));
+        }, 80L + (estimatedWidth * 3L));
 
         return true;
     }

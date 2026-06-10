@@ -24,8 +24,16 @@ public class BoardSpawner {
     private final JiraClient jiraClient;
     private final BoardManager boardManager;
 
-    private static final int COLUMN_WIDTH = 2;
-    private static final int COLUMN_SPACING = 5;
+    private static final int MAX_HEIGHT = 3; // 3 rows tall — visible in survival without looking up
+    private static final int SEPARATOR_WIDTH = 1; // 1 empty block between columns
+
+    private static final Material[] COLUMN_COLORS = {
+            Material.WHITE_CONCRETE,
+            Material.LIGHT_BLUE_CONCRETE,
+            Material.YELLOW_CONCRETE,
+            Material.PURPLE_CONCRETE,
+            Material.LIME_CONCRETE
+    };
 
     public BoardSpawner(ByndiecraftPlugin plugin, JiraClient jiraClient, BoardManager boardManager) {
         this.plugin = plugin;
@@ -65,34 +73,33 @@ public class BoardSpawner {
         });
     }
 
-    public void clearBoard(Location anchor, int columnCount, int maxHeight) {
+    public void clearBoard(Location anchor, int totalWidth) {
         World world = anchor.getWorld();
         if (world == null) return;
 
-        int totalWidth = columnCount * COLUMN_SPACING;
         int startX = anchor.getBlockX();
         int startY = anchor.getBlockY();
         int startZ = anchor.getBlockZ();
 
+        // Remove item frames in the area
         world.getEntities().stream()
                 .filter(e -> e instanceof ItemFrame)
                 .filter(e -> {
                     Location loc = e.getLocation();
-                    return loc.getBlockX() >= startX && loc.getBlockX() < startX + totalWidth
-                            && loc.getBlockY() >= startY - maxHeight && loc.getBlockY() <= startY + 1
-                            && Math.abs(loc.getBlockZ() - startZ) <= 1;
+                    return loc.getBlockX() >= startX - 1 && loc.getBlockX() < startX + totalWidth + 1
+                            && loc.getBlockY() >= startY - 1 && loc.getBlockY() <= startY + MAX_HEIGHT + 2
+                            && Math.abs(loc.getBlockZ() - startZ) <= 2;
                 })
                 .forEach(e -> e.remove());
 
-        for (int x = startX; x < startX + totalWidth; x++) {
-            for (int y = startY - maxHeight; y <= startY + 1; y++) {
-                Block block = world.getBlockAt(x, y, startZ);
-                if (block.getType() != Material.AIR) {
-                    block.setType(Material.AIR);
-                }
-                Block backing = world.getBlockAt(x, y, startZ - 1);
-                if (backing.getType() == Material.OAK_PLANKS) {
-                    backing.setType(Material.AIR);
+        // Clear everything: backing, frames, decorations, floor, roof
+        for (int x = startX - 1; x < startX + totalWidth + 1; x++) {
+            for (int y = startY - 1; y <= startY + MAX_HEIGHT + 2; y++) {
+                for (int dz = -1; dz <= 1; dz++) {
+                    Block block = world.getBlockAt(x, y, startZ + dz);
+                    if (block.getType() != Material.AIR) {
+                        block.setType(Material.AIR);
+                    }
                 }
             }
         }
@@ -112,36 +119,55 @@ public class BoardSpawner {
 
         List<StatusColumn> columns = boardManager.getBoard().getColumns();
 
-        // With 2-wide columns, height is ceil(ticketCount / 2)
-        int maxRows = ticketsByStatus.values().stream()
-                .mapToInt(list -> (list.size() + COLUMN_WIDTH - 1) / COLUMN_WIDTH)
-                .max()
-                .orElse(0);
+        // Calculate width needed per column: ceil(ticketCount / MAX_HEIGHT) blocks wide, minimum 2
+        int[] columnWidths = new int[columns.size()];
+        for (int i = 0; i < columns.size(); i++) {
+            int count = ticketsByStatus.getOrDefault(columns.get(i).getJiraStatusName().toLowerCase(), Collections.emptyList()).size();
+            columnWidths[i] = Math.max(2, (count + MAX_HEIGHT - 1) / MAX_HEIGHT);
+        }
 
-        clearBoard(anchor, columns.size(), maxRows);
+        // Total board width
+        int totalWidth = 0;
+        for (int i = 0; i < columnWidths.length; i++) {
+            totalWidth += columnWidths[i];
+            if (i < columnWidths.length - 1) totalWidth += SEPARATOR_WIDTH;
+        }
+
+        clearBoard(anchor, totalWidth);
 
         int baseX = anchor.getBlockX();
         int baseY = anchor.getBlockY();
         int baseZ = anchor.getBlockZ();
+        int topY = baseY + MAX_HEIGHT;
+
+        // Floor base — dark oak slab platform
+        for (int x = baseX - 1; x <= baseX + totalWidth; x++) {
+            world.getBlockAt(x, baseY - 1, baseZ).setType(Material.DARK_OAK_SLAB);
+            world.getBlockAt(x, baseY - 1, baseZ - 1).setType(Material.DARK_OAK_SLAB);
+            world.getBlockAt(x, baseY - 1, baseZ + 1).setType(Material.DARK_OAK_SLAB);
+        }
+
+        int currentX = baseX;
 
         for (int colIdx = 0; colIdx < columns.size(); colIdx++) {
             StatusColumn column = columns.get(colIdx);
-            int colX = baseX + (colIdx * COLUMN_SPACING);
+            int colWidth = columnWidths[colIdx];
 
             List<JiraTicket> columnTickets = ticketsByStatus.getOrDefault(column.getJiraStatusName().toLowerCase(), Collections.emptyList());
             int ticketCount = columnTickets.size();
-            int columnRows = (ticketCount + COLUMN_WIDTH - 1) / COLUMN_WIDTH;
 
-            // Backing wall — extend to max rows so all columns have equal space
-            for (int y = baseY + 1; y >= baseY - maxRows; y--) {
-                for (int dx = 0; dx < COLUMN_WIDTH; dx++) {
-                    Block backing = world.getBlockAt(colX + dx, y, baseZ - 1);
-                    backing.setType(Material.OAK_PLANKS);
+            // Backing wall — colored concrete, fixed height
+            Material wallMaterial = COLUMN_COLORS[colIdx % COLUMN_COLORS.length];
+            for (int y = baseY; y <= topY; y++) {
+                for (int dx = 0; dx < colWidth; dx++) {
+                    Block backing = world.getBlockAt(currentX + dx, y, baseZ - 1);
+                    backing.setType(wallMaterial);
                 }
             }
 
-            // Column header sign
-            Block signBlock = world.getBlockAt(colX, baseY + 1, baseZ);
+            // Column header sign at the top center
+            int signX = currentX + (colWidth / 2);
+            Block signBlock = world.getBlockAt(signX, topY + 1, baseZ);
             signBlock.setType(Material.OAK_WALL_SIGN);
             org.bukkit.block.data.type.WallSign signData =
                     (org.bukkit.block.data.type.WallSign) signBlock.getBlockData();
@@ -153,14 +179,17 @@ public class BoardSpawner {
                 sign.update();
             }
 
+            // Backing behind the sign
+            world.getBlockAt(signX, topY + 1, baseZ - 1).setType(wallMaterial);
+
             column.getFrameLocations().forEach(column::removeFrameLocation);
 
-            // Place item frames in a grid: 2 wide x maxRows tall
+            // Place item frames: fill columns top-to-bottom, then left-to-right
             int ticketIdx = 0;
-            for (int row = 0; row < maxRows; row++) {
-                int frameY = baseY - row;
-                for (int dx = 0; dx < COLUMN_WIDTH; dx++) {
-                    Location frameLoc = new Location(world, colX + dx, frameY, baseZ);
+            for (int dx = 0; dx < colWidth; dx++) {
+                for (int row = 0; row < MAX_HEIGHT; row++) {
+                    int frameY = baseY + (MAX_HEIGHT - 1 - row); // top to bottom
+                    Location frameLoc = new Location(world, currentX + dx, frameY, baseZ);
 
                     ItemFrame frame = (ItemFrame) world.spawnEntity(frameLoc, EntityType.ITEM_FRAME);
                     frame.setFacingDirection(BlockFace.SOUTH);
@@ -176,6 +205,39 @@ public class BoardSpawner {
                     column.addFrameLocation(frameLoc);
                 }
             }
+
+            currentX += colWidth;
+
+            // Separator pillar between columns
+            if (colIdx < columns.size() - 1) {
+                for (int y = baseY; y <= topY; y++) {
+                    world.getBlockAt(currentX, y, baseZ - 1).setType(Material.DARK_OAK_LOG);
+                }
+                // Lantern on the pillar
+                world.getBlockAt(currentX, baseY + 1, baseZ).setType(Material.LANTERN);
+                currentX += SEPARATOR_WIDTH;
+            }
+        }
+
+        // Top roof trim — spruce slab across the top
+        for (int x = baseX - 1; x <= baseX + totalWidth; x++) {
+            world.getBlockAt(x, topY + 2, baseZ - 1).setType(Material.SPRUCE_SLAB);
+        }
+
+        // Corner pillars with soul lanterns
+        int leftPillarX = baseX - 1;
+        int rightPillarX = baseX + totalWidth;
+        for (int y = baseY; y <= topY + 2; y++) {
+            world.getBlockAt(leftPillarX, y, baseZ - 1).setType(Material.DARK_OAK_LOG);
+            world.getBlockAt(rightPillarX, y, baseZ - 1).setType(Material.DARK_OAK_LOG);
+        }
+        world.getBlockAt(leftPillarX, topY + 2, baseZ).setType(Material.SOUL_LANTERN);
+        world.getBlockAt(rightPillarX, topY + 2, baseZ).setType(Material.SOUL_LANTERN);
+
+        // Flower pots along the base
+        for (int x = baseX; x < baseX + totalWidth; x += 3) {
+            Block pot = world.getBlockAt(x, baseY, baseZ + 1);
+            pot.setType(Material.POTTED_FERN);
         }
     }
 
