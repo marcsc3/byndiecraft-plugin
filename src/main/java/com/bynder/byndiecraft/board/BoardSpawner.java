@@ -95,13 +95,13 @@ public class BoardSpawner {
                 })
                 .forEach(e -> e.remove());
 
-        // Clear board structure only — don't touch the ground below
+        // Clear board structure without dropping items
         for (int x = startX - 1; x < startX + totalWidth + 1; x++) {
             for (int y = startY; y <= startY + MAX_HEIGHT + 2; y++) {
-                for (int dz = -1; dz <= 1; dz++) {
+                for (int dz = 1; dz >= -1; dz--) {
                     Block block = world.getBlockAt(x, y, startZ + dz);
                     if (block.getType() != Material.AIR) {
-                        block.setType(Material.AIR);
+                        block.setType(Material.AIR, false);
                     }
                 }
             }
