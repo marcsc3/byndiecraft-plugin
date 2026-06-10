@@ -1,5 +1,7 @@
 package com.bynder.byndiecraft;
 
+import com.bynder.byndiecraft.ai.AIChestListener;
+import com.bynder.byndiecraft.ai.AITaskManager;
 import com.bynder.byndiecraft.board.BoardManager;
 import com.bynder.byndiecraft.board.BoardSpawner;
 import com.bynder.byndiecraft.board.JiraBoard;
@@ -16,6 +18,8 @@ public class ByndiecraftPlugin extends JavaPlugin {
     private JiraClient jiraClient;
     private BoardManager boardManager;
     private ConfigLoader configLoader;
+    private AITaskManager aiTaskManager;
+    private AIChestListener aiChestListener;
 
     @Override
     public void onEnable() {
@@ -61,6 +65,17 @@ public class ByndiecraftPlugin extends JavaPlugin {
         ItemFrameListener itemFrameListener = new ItemFrameListener(this, boardManager, jiraClient, debugMode);
         Bukkit.getPluginManager().registerEvents(itemFrameListener, this);
         getLogger().info("✓ Event listeners registered");
+
+        // Initialize AI system if enabled
+        if (getConfig().getBoolean("ai.enabled", false)) {
+            aiTaskManager = new AITaskManager(this, jiraClient);
+            aiChestListener = new AIChestListener(this, aiTaskManager);
+            Bukkit.getPluginManager().registerEvents(aiChestListener, this);
+            getLogger().info("✓ AI system initialized (Phase 2)");
+            getLogger().info("  MCP endpoint: " + getConfig().getString("ai.mcp_endpoint"));
+        } else {
+            getLogger().info("ℹ AI system disabled (set ai.enabled: true to enable Phase 2)");
+        }
 
         // Initialize board spawner
         BoardSpawner boardSpawner = new BoardSpawner(this, jiraClient, boardManager);
@@ -123,5 +138,9 @@ public class ByndiecraftPlugin extends JavaPlugin {
 
     public ConfigLoader getConfigLoader() {
         return configLoader;
+    }
+
+    public AIChestListener getAIChestListener() {
+        return aiChestListener;
     }
 }

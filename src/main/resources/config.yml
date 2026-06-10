@@ -60,10 +60,45 @@ fireworks:
   trail: true
   flicker: true
 
-# Phase 2 features (not implemented yet)
-sync:
-  enabled: false
-  interval_seconds: 60
+# Phase 2: AI-Powered Ticket Implementation
+ai:
+  enabled: true
+
+  # AI Hopper location (set via /jiraboard setaihopper command)
+  # Players throw books into this hopper to trigger AI implementation
+  hopper_location:
+    world: "world"
+    x: 0
+    y: 0
+    z: 0
+
+  # MCP Server endpoint
+  mcp_endpoint: "http://localhost:3000/implement-ticket"
+
+  # AWS Bedrock integration
+  bedrock:
+    # AWS credentials - using Bynder's AWS profile
+    aws_profile: "development"
+    region: "eu-central-1"
+
+    # Model configuration - using Bynder's Claude Sonnet 4.5 inference profile
+    model_id: "arn:aws:bedrock:eu-central-1:745091492598:application-inference-profile/ltk3rb6ikzf9"
+    max_tokens: 8000
+
+  # GitHub configuration
+  github:
+    # Authentication: use gh CLI (run "gh auth login" once)
+    # No token needed when using gh CLI!
+    default_owner: "bynder"
+    default_repo: "byndiecraft-plugin"
+
+    # Repo determination strategy
+    auto_detect: true  # Let Claude decide from ticket
+
+  # Visual feedback
+  visual_effects: true
+  return_book_on_completion: true
+  add_pr_link_to_book_lore: true
 
 # Debug mode - set to true for verbose logging
 debug: true

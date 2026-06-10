@@ -10,6 +10,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Sound;
 import org.bukkit.World;
+import org.bukkit.block.Block;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -69,6 +70,12 @@ public class JiraBoardCommand implements CommandExecutor, TabCompleter {
 
             case "delete":
                 return handleDelete(sender);
+
+            case "setaihopper":
+                return handleSetAIHopper(sender);
+
+            case "aiinfo":
+                return handleAIInfo(sender);
 
             case "help":
                 sendHelp(sender);
@@ -271,6 +278,86 @@ public class JiraBoardCommand implements CommandExecutor, TabCompleter {
         return null;
     }
 
+    private boolean handleSetAIHopper(CommandSender sender) {
+        if (!(sender instanceof Player player)) {
+            sender.sendMessage(Component.text("This command can only be used by players!")
+                    .color(NamedTextColor.RED));
+            return true;
+        }
+
+        if (!plugin.getConfig().getBoolean("ai.enabled", false)) {
+            player.sendMessage(Component.text("⚠ AI system is disabled. Set ai.enabled: true in config.yml")
+                    .color(NamedTextColor.YELLOW));
+            return true;
+        }
+
+        // Get the block the player is looking at
+        Block targetBlock = player.getTargetBlockExact(5);
+        if (targetBlock == null || targetBlock.getType() != org.bukkit.Material.HOPPER) {
+            player.sendMessage(Component.text("⚠ You must be looking at a hopper!")
+                    .color(NamedTextColor.YELLOW));
+            player.sendMessage(Component.text("Look at a hopper and run this command again")
+                    .color(NamedTextColor.GRAY));
+            return true;
+        }
+
+        Location hopperLocation = targetBlock.getLocation();
+        var aiChestListener = plugin.getAIChestListener();
+        if (aiChestListener != null) {
+            aiChestListener.setAIHopperLocation(hopperLocation);
+            player.sendMessage(Component.text("✓ AI Hopper set at: " +
+                    String.format("(%d, %d, %d)", hopperLocation.getBlockX(), hopperLocation.getBlockY(), hopperLocation.getBlockZ()))
+                    .color(NamedTextColor.GREEN));
+            player.sendMessage(Component.text("Throw written books with Jira ticket keys into this hopper to trigger AI implementation!")
+                    .color(NamedTextColor.GRAY));
+        } else {
+            player.sendMessage(Component.text("⚠ AI system not initialized")
+                    .color(NamedTextColor.RED));
+        }
+
+        return true;
+    }
+
+    private boolean handleAIInfo(CommandSender sender) {
+        sender.sendMessage(Component.text("=== AI System Info ===").color(NamedTextColor.GOLD));
+
+        boolean aiEnabled = plugin.getConfig().getBoolean("ai.enabled", false);
+        sender.sendMessage(Component.text("Status: " + (aiEnabled ? "ENABLED" : "DISABLED"))
+                .color(aiEnabled ? NamedTextColor.GREEN : NamedTextColor.RED));
+
+        if (!aiEnabled) {
+            sender.sendMessage(Component.text("Set ai.enabled: true in config.yml to enable Phase 2")
+                    .color(NamedTextColor.GRAY));
+            return true;
+        }
+
+        String mcpEndpoint = plugin.getConfig().getString("ai.mcp_endpoint");
+        sender.sendMessage(Component.text("MCP Endpoint: " + mcpEndpoint).color(NamedTextColor.AQUA));
+
+        String modelId = plugin.getConfig().getString("ai.bedrock.model_id");
+        sender.sendMessage(Component.text("Bedrock Model: " + modelId).color(NamedTextColor.AQUA));
+
+        var aiChestListener = plugin.getAIChestListener();
+        if (aiChestListener != null) {
+            Location aiHopperLoc = aiChestListener.getAIHopperLocation();
+            if (aiHopperLoc != null) {
+                sender.sendMessage(Component.text(String.format("AI Hopper: %s (%d, %d, %d)",
+                        aiHopperLoc.getWorld().getName(),
+                        aiHopperLoc.getBlockX(),
+                        aiHopperLoc.getBlockY(),
+                        aiHopperLoc.getBlockZ()))
+                        .color(NamedTextColor.GREEN));
+            } else {
+                sender.sendMessage(Component.text("AI Hopper: Not configured")
+                        .color(NamedTextColor.YELLOW));
+                sender.sendMessage(Component.text("Use /jiraboard setaihopper to configure")
+                        .color(NamedTextColor.GRAY));
+            }
+        }
+
+        return true;
+    }
+
     private void sendHelp(CommandSender sender) {
         sender.sendMessage(Component.text("=== Byndiecraft Commands ===").color(NamedTextColor.GOLD));
         sender.sendMessage(Component.text("/jiraboard info").color(NamedTextColor.YELLOW)
@@ -287,13 +374,19 @@ public class JiraBoardCommand implements CommandExecutor, TabCompleter {
                 .append(Component.text(" - Rebuild board with fresh Jira data").color(NamedTextColor.GRAY)));
         sender.sendMessage(Component.text("/jiraboard delete").color(NamedTextColor.YELLOW)
                 .append(Component.text(" - Explode the board with TNT!").color(NamedTextColor.GRAY)));
+        sender.sendMessage(Component.text(""));
+        sender.sendMessage(Component.text("=== AI Commands (Phase 2) ===").color(NamedTextColor.LIGHT_PURPLE));
+        sender.sendMessage(Component.text("/jiraboard setaihopper").color(NamedTextColor.YELLOW)
+                .append(Component.text(" - Set AI hopper (look at hopper)").color(NamedTextColor.GRAY)));
+        sender.sendMessage(Component.text("/jiraboard aiinfo").color(NamedTextColor.YELLOW)
+                .append(Component.text(" - Show AI system status").color(NamedTextColor.GRAY)));
     }
 
     @Nullable
     @Override
     public List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command, @NotNull String alias, @NotNull String[] args) {
         if (args.length == 1) {
-            return Arrays.asList("info", "setup", "spawn", "addcolumn", "refresh", "delete", "help");
+            return Arrays.asList("info", "setup", "spawn", "addcolumn", "refresh", "delete", "setaihopper", "aiinfo", "debug", "help");
         }
 
         if (args.length == 2 && args[0].equalsIgnoreCase("addcolumn")) {
