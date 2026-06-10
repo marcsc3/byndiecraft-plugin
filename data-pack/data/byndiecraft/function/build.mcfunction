@@ -14,6 +14,7 @@ execute positioned 0 -60 0 run function byndiecraft:house5
 execute positioned 0 -60 0 run function byndiecraft:atrium
 execute positioned 0 -60 0 run function byndiecraft:plaza
 execute positioned 0 -60 0 run function byndiecraft:github_tower
+execute positioned 0 -60 0 run function byndiecraft:github_tower_entrance
 execute positioned 0 -60 0 run function byndiecraft:paths
 execute positioned 0 -60 0 run function byndiecraft:decorations
 
