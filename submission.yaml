@@ -1,0 +1,40 @@
+# Bynder Hackathon 2026 - Submission
+# Team Byndiecraft
+
+team_name: "Byndiecraft"
+category: "Wildcard - BYOI"
+
+project:
+  name: "Byndiecraft"
+  tagline: "A physical Jira board in Minecraft with AI-powered ticket implementation"
+  description: |
+    Byndiecraft turns Minecraft into a living, interactive Jira board. Tickets appear as
+    colored books in item frames. Move a book between columns and the Jira ticket transitions
+    automatically. Throw a book into the AI Hopper and Claude implements the ticket, writes
+    real code, and creates a Pull Request on GitHub — all without leaving the game.
+
+tech_stack:
+  - "Java 25 (Paper API 1.21 - Minecraft)"
+  - "Node.js (MCP orchestration server)"
+  - "Claude Sonnet 4.5 (AWS Bedrock) - runtime AI"
+  - "Claude Code (Opus) - development AI"
+  - "Jira REST API v3"
+  - "GitHub CLI (gh)"
+  - "AWS EC2 with IAM role"
+  - "OkHttp, Express, Adventure Text API"
+
+ai_tools_used:
+  - tool: "Claude Code"
+    purpose: "Primary development tool - architecture, implementation, debugging, deployment"
+  - tool: "Claude Sonnet 4.5 (AWS Bedrock)"
+    purpose: "Runtime AI engine - repository detection, code generation, PR creation"
+
+deliverables:
+  code: "https://github.com/marcsc3/byndiecraft-plugin"
+  prd: "PRD.md in repository root"
+  ai_documentation: "AI_PROCESS.md in repository root"
+
+team_members:
+  - name: "Didac Cumelles"
+  - name: "Marc SC"
+  - name: "Eric Moragon"
