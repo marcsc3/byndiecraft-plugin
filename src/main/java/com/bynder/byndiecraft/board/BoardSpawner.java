@@ -133,11 +133,12 @@ public class BoardSpawner {
             if (i < columnWidths.length - 1) totalWidth += SEPARATOR_WIDTH;
         }
 
-        clearBoard(anchor, totalWidth);
-
-        int baseX = anchor.getBlockX();
+        int anchorX = anchor.getBlockX();
+        int baseX = anchorX - (totalWidth / 2); // center the board on anchor X
         int baseY = anchor.getBlockY();
         int baseZ = anchor.getBlockZ();
+
+        clearBoard(new Location(world, baseX, baseY, baseZ), totalWidth);
         int topY = baseY + MAX_HEIGHT;
 
         // Floor base — dark oak slab platform

@@ -25,7 +25,7 @@ board:
   anchor:
     x: 0
     y: -59
-    z: 0
+    z: -15
 
   # Status columns configuration
   # "name" is displayed on the Minecraft sign; "jira_status_name" must match the API status

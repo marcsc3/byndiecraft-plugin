@@ -225,13 +225,14 @@ public class JiraBoardCommand implements CommandExecutor, TabCompleter {
         World world = anchor.getWorld();
         if (world == null) return true;
 
-        int baseX = anchor.getBlockX();
+        int anchorX = anchor.getBlockX();
         int baseY = anchor.getBlockY();
         int baseZ = anchor.getBlockZ();
 
         // Estimate total width (assume ~4 blocks per column with separators)
         int columns = boardManager.getBoard().getColumns().size();
         int estimatedWidth = columns * 4;
+        int baseX = anchorX - (estimatedWidth / 2);
 
         player.sendMessage(Component.text("💥 Demolishing the board...")
                 .color(NamedTextColor.RED));
@@ -244,8 +245,9 @@ public class JiraBoardCommand implements CommandExecutor, TabCompleter {
         }
 
         // Clear the board after explosions finish
+        final Location clearAnchor = new Location(world, baseX, baseY, baseZ);
         Bukkit.getScheduler().runTaskLater(plugin, () -> {
-            boardSpawner.clearBoard(anchor, estimatedWidth);
+            boardSpawner.clearBoard(clearAnchor, estimatedWidth);
             player.sendMessage(Component.text("✓ Board destroyed!")
                     .color(NamedTextColor.GREEN));
             player.playSound(player.getLocation(), Sound.ENTITY_GENERIC_EXPLODE, 1.0f, 1.0f);
