@@ -50,8 +50,8 @@ app.post('/implement-ticket', async (req, res) => {
     console.log(`[MCP] Jira URL: ${jiraUrl}`);
 
     try {
-        // Step 1: Determine repository
-        const repoInfo = determineRepository(ticketSummary, ticketDescription);
+        // Step 1: Determine repository (uses Claude via Bedrock)
+        const repoInfo = await determineRepository(ticketSummary, ticketDescription);
         console.log(`[MCP] Target repository: ${repoInfo.owner}/${repoInfo.repo}`);
 
         // Step 2: Clone repository
@@ -107,24 +107,55 @@ app.post('/implement-ticket', async (req, res) => {
     }
 });
 
-// Determine which repository to use based on ticket content
-function determineRepository(summary, description) {
-    const text = `${summary} ${description || ''}`.toLowerCase();
+// Determine which repository to use based on ticket content (uses Bedrock/Claude)
+async function determineRepository(summary, description) {
+    const text = `${summary}\n${description || ''}`;
 
-    // Simple keyword-based routing
-    // Customize this for your repos
-    if (text.includes('frontend') || text.includes('react') || text.includes('ui')) {
-        return { owner: GITHUB_DEFAULT_OWNER, repo: 'frontend' };
-    }
-    if (text.includes('backend') || text.includes('api') || text.includes('java')) {
-        return { owner: GITHUB_DEFAULT_OWNER, repo: 'backend' };
-    }
-    if (text.includes('infra') || text.includes('terraform') || text.includes('aws')) {
-        return { owner: GITHUB_DEFAULT_OWNER, repo: 'infra' };
+    // First, get a list of repos from the org to give Claude context
+    let repoList = '';
+    try {
+        repoList = execSync(`gh repo list ${GITHUB_DEFAULT_OWNER} --limit 50 --json name -q '.[].name'`, {
+            encoding: 'utf-8',
+            timeout: 10000
+        }).trim();
+    } catch (e) {
+        console.log('[MCP] Could not fetch repo list from GitHub, using Claude without repo list');
     }
 
-    // Default repo
-    return { owner: GITHUB_DEFAULT_OWNER, repo: GITHUB_DEFAULT_REPO };
+    const prompt = `Given this Jira ticket, determine which GitHub repository it belongs to.
+
+Ticket title: ${summary}
+Ticket description: ${description || 'No description'}
+
+${repoList ? `Available repositories in the org:\n${repoList}\n` : ''}
+
+Respond with ONLY the repository name, nothing else. No explanation, no quotes, just the repo name.
+If you cannot determine the repository, respond with: ${GITHUB_DEFAULT_REPO}`;
+
+    try {
+        const payload = {
+            anthropic_version: 'bedrock-2023-05-31',
+            max_tokens: 100,
+            messages: [{ role: 'user', content: prompt }]
+        };
+
+        const command = new InvokeModelCommand({
+            modelId: MODEL_ID,
+            contentType: 'application/json',
+            accept: 'application/json',
+            body: JSON.stringify(payload)
+        });
+
+        const response = await bedrockClient.send(command);
+        const responseBody = JSON.parse(Buffer.from(response.body).toString());
+        const repo = responseBody.content[0].text.trim();
+
+        console.log(`[MCP] Claude determined repo: ${repo}`);
+        return { owner: GITHUB_DEFAULT_OWNER, repo };
+    } catch (e) {
+        console.error(`[MCP] Bedrock repo detection failed: ${e.message}, using default`);
+        return { owner: GITHUB_DEFAULT_OWNER, repo: GITHUB_DEFAULT_REPO };
+    }
 }
 
 // Clone repository to temporary directory
