@@ -28,11 +28,12 @@ cp .env.example .env
 Edit `.env` with your settings:
 
 ```env
-AWS_PROFILE=development
+# Comment out AWS_PROFILE if running on EC2 with an IAM role
+#AWS_PROFILE=development
 AWS_REGION=eu-central-1
 CLAUDE_SONNET_4_5_MODEL_ID=arn:aws:bedrock:eu-central-1:745091492598:application-inference-profile/ltk3rb6ikzf9
 GITHUB_DEFAULT_OWNER=bynder
-GITHUB_DEFAULT_REPO=byndiecraft-plugin
+GITHUB_DEFAULT_REPO=asset-enrichment-agent-svc
 PORT=3000
 ```
 
@@ -40,19 +41,24 @@ PORT=3000
 
 ```bash
 gh auth login
+gh auth setup-git
 ```
 
 Follow the prompts to authenticate. This only needs to be done once.
+`gh auth setup-git` configures git to use `gh` as the credential helper for HTTPS clones.
 
 ### 4. Verify AWS Credentials
 
-Make sure your AWS profile is configured:
+If running on EC2 with an IAM role, credentials are automatic. Otherwise:
 
 ```bash
-aws configure list --profile development
+aws configure --profile development
 ```
 
-You should see your credentials for the `development` profile.
+On EC2, verify the instance role:
+```bash
+curl -s -H "X-aws-ec2-metadata-token: $(curl -s -X PUT 'http://169.254.169.254/latest/api/token' -H 'X-aws-ec2-metadata-token-ttl-seconds: 21600')" http://169.254.169.254/latest/meta-data/iam/security-credentials/
+```
 
 ## Running the Server
 
@@ -172,14 +178,14 @@ Main endpoint for ticket implementation.
 
 ## Repository Routing
 
-The server automatically determines which repository to use based on keywords in the ticket:
+The server uses **Claude (via AWS Bedrock)** to intelligently determine which repository a ticket belongs to:
 
-- **Frontend**: Contains "frontend", "react", "ui"
-- **Backend**: Contains "backend", "api", "java"
-- **Infrastructure**: Contains "infra", "terraform", "aws"
-- **Default**: Falls back to `GITHUB_DEFAULT_REPO`
+1. Fetches the list of repositories from the GitHub org (`gh repo list`)
+2. Sends the ticket title, description, and repo list to Claude
+3. Claude identifies the correct repository from context
+4. Falls back to `GITHUB_DEFAULT_REPO` (asset-enrichment-agent-svc) if detection fails
 
-You can customize this in `determineRepository()` function in `server.js`.
+The repo name is typically present in the Jira ticket description. Claude reads this and matches it to the correct org repository.
 
 ## Troubleshooting
 
