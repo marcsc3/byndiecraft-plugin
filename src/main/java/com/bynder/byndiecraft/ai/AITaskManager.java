@@ -54,19 +54,23 @@ public class AITaskManager {
 
                 String summary = jiraTicketResult.getSummary();
                 String description = jiraTicketResult.getDescription();
+                if (description == null) description = "";
 
-                // Also extract text from book pages (contains description + any extra context)
-                if ((description == null || description.isEmpty()) && book.getItemMeta() instanceof BookMeta bookMeta) {
+                // Always include book pages content (has repo info and extra context)
+                if (book.getItemMeta() instanceof BookMeta bookMeta) {
                     StringBuilder bookContent = new StringBuilder();
                     List<Component> pages = bookMeta.pages();
-                    for (int i = 1; i < pages.size(); i++) { // skip page 0 (title/status info)
+                    for (int i = 1; i < pages.size(); i++) {
                         bookContent.append(PlainTextComponentSerializer.plainText().serialize(pages.get(i)));
                         bookContent.append("\n");
                     }
-                    description = bookContent.toString().trim();
+                    String bookText = bookContent.toString().trim();
+                    if (!bookText.isEmpty()) {
+                        description = description.isEmpty() ? bookText : description + "\n\n" + bookText;
+                    }
                 }
 
-                if (description == null || description.isEmpty()) {
+                if (description.isEmpty()) {
                     description = summary;
                 }
 
