@@ -272,7 +272,7 @@ public class BoardSpawner {
         return switch (issueType.toLowerCase()) {
             case "bug" -> NamedTextColor.RED;
             case "story" -> NamedTextColor.GREEN;
-            case "task", "sub-task", "subtask" -> NamedTextColor.BLUE;
+            case "task", "sub-task", "subtask" -> NamedTextColor.AQUA;
             case "spike" -> NamedTextColor.GOLD;
             default -> NamedTextColor.WHITE;
         };
