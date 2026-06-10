@@ -90,14 +90,14 @@ public class BoardSpawner {
                 .filter(e -> {
                     Location loc = e.getLocation();
                     return loc.getBlockX() >= startX - 1 && loc.getBlockX() < startX + totalWidth + 1
-                            && loc.getBlockY() >= startY - 1 && loc.getBlockY() <= startY + MAX_HEIGHT + 2
+                            && loc.getBlockY() >= startY && loc.getBlockY() <= startY + MAX_HEIGHT + 2
                             && Math.abs(loc.getBlockZ() - startZ) <= 2;
                 })
                 .forEach(e -> e.remove());
 
-        // Clear everything: backing, frames, decorations, floor, roof
+        // Clear board structure only — don't touch the ground below
         for (int x = startX - 1; x < startX + totalWidth + 1; x++) {
-            for (int y = startY - 1; y <= startY + MAX_HEIGHT + 2; y++) {
+            for (int y = startY; y <= startY + MAX_HEIGHT + 2; y++) {
                 for (int dz = -1; dz <= 1; dz++) {
                     Block block = world.getBlockAt(x, y, startZ + dz);
                     if (block.getType() != Material.AIR) {
@@ -217,11 +217,6 @@ public class BoardSpawner {
                 world.getBlockAt(currentX, topY - 1, baseZ).setType(Material.LANTERN);
                 currentX += SEPARATOR_WIDTH;
             }
-        }
-
-        // Cobblestone wall base — runs along the bottom, feels like a foundation
-        for (int x = baseX - 1; x <= baseX + totalWidth; x++) {
-            world.getBlockAt(x, baseY - 1, baseZ - 1).setType(Material.COBBLESTONE_WALL);
         }
 
         // Overhang roof — stair blocks facing outward for a natural eave

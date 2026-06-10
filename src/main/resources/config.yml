@@ -24,7 +24,7 @@ board:
   # If not set, /jiraboard spawn uses the player's current location
   anchor:
     x: 0
-    y: -59
+    y: -60
     z: -15
 
   # Status columns configuration
