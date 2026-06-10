@@ -29,6 +29,13 @@ Our entire development process was AI-assisted. Claude Code was not just a code 
 - Iteratively refined: book colors, multi-page descriptions, column sizing
 - Fixed production issues live: item frame rotation duplicates, status mapping
 
+**Infrastructure: EC2 Server**
+- Manually provisioned and configured an AWS EC2 instance (eu-central-1)
+- Installed Java 25, Maven, Node.js, and GitHub CLI on the server
+- Configured IAM role for Bedrock access (no hardcoded credentials)
+- Set up Paper 1.21 Minecraft server with proper port forwarding and firewall rules
+- Deployed both the plugin JAR and MCP server as separate processes
+
 **Phase 2: AI Hopper**
 - Designed the MCP server architecture through conversation
 - Claude Code implemented the full Node.js server (Bedrock + GitHub integration)
